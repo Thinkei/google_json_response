@@ -134,6 +134,23 @@ describe GoogleJsonResponse do
     end
   end
 
+  describe ".render_generic_error" do
+    it 'renders error correctly' do
+      response = GoogleJsonResponse.render_generic_error("You can't access this page", '401')
+      expect(response).to eq({
+                               error:{
+                                        code: '401',
+                                        errors: [
+                                          {
+                                            message: "You can't access this page",
+                                            reason: 'error'
+                                          }
+                                        ]
+                                      }
+                             })
+    end
+  end
+
   it "has a version number" do
     expect(GoogleJsonResponse::VERSION).not_to be nil
   end

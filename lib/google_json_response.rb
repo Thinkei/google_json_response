@@ -27,6 +27,20 @@ module GoogleJsonResponse
       end
     end
 
+    def render_generic_error(message, status = '400')
+      {
+        error: {
+          code: status,
+          errors: [
+            {
+              reason: 'error',
+              message: message
+            }
+          ]
+        }
+      }
+    end
+
     private
 
     def is_error?(data)

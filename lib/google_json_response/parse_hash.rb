@@ -3,10 +3,13 @@ module GoogleJsonResponse
     attr_reader :parsed_data
 
     def initialize(data, options = {})
-      @options = options
+      @data = data
     end
 
     def call
+      @parsed_data = {
+        data: @data
+      }
     end
   end
 end
