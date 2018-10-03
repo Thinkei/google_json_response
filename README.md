@@ -21,8 +21,9 @@ Or install it yourself as:
     $ gem install google_json_response
 
 ## Usage
-
+#### Scenario 1: ABC
 TODO: Write usage instructions here
+#### Scenario 2: ABC
 
 ## Development
 
