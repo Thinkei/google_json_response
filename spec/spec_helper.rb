@@ -7,3 +7,4 @@ ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
 load File.dirname(__FILE__) + '/support/schema.rb'
 require File.dirname(__FILE__) + '/support/models.rb'
 require File.dirname(__FILE__) + '/support/serializers.rb'
+require File.dirname(__FILE__) + '/support/custom_errors.rb'
