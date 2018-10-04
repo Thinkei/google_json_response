@@ -1,3 +1,5 @@
+require 'json'
+
 manifest_path = File.expand_path('../../app.json', __FILE__)
 version = JSON.parse(File.read(manifest_path))['version']
 
