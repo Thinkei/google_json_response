@@ -1,0 +1,11 @@
+{
+  "name": "google_json_response",
+  "version": "0.1.0",
+  "documents": [
+    {
+      "name": "Parser for APIs following Google JSON style",
+      "source": "README.md",
+      "format": "markdown"
+    }
+  ]
+}
