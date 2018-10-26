@@ -84,7 +84,7 @@ describe GoogleJsonResponse::ParseErrors do
                                                       },
                                                       {
                                                         message: "Error 2",
-                                                        reason: 'error'
+                                                        reason: 'StandardError'
                                                       }
                                                     ]
                                                   }
