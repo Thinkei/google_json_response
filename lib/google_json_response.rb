@@ -1,20 +1,22 @@
 require "google_json_response/version"
-require "google_json_response/parse_active_records"
-require "google_json_response/parse_errors"
 require "google_json_response/parse_hash"
-require 'active_model'
-require 'active_record'
 
 module GoogleJsonResponse
   class << self
-    def parse(data, options = {})
+    def render(data, options = {})
       if is_error?(data) || is_errors?(data)
-        parser = ParseErrors.new(data, options)
-        parser.call
-        return parser.parsed_data
+        if !defined?(GoogleJsonResponse::ErrorParsers)
+          raise "Please require google_json_response/error_parsers"\
+                " to render errors"
+        end
+        return ErrorParsers.parse(data, options)
       end
 
       if is_active_record_object?(data) || is_active_record_objects?(data)
+        if !defined?(GoogleJsonResponse::ParseActiveRecords)
+          raise "Please require google_json_response/parse_active_records"\
+                " to render active records"
+        end
         parser = ParseActiveRecords.new(data, options)
         parser.call
         return parser.parsed_data
@@ -26,6 +28,25 @@ module GoogleJsonResponse
         return parser.parsed_data
       end
     end
+
+    def render_error(data, options = {})
+      if data.is_a?(String)
+        render_generic_error(data, options[:code])
+      else
+        render(data, options)
+      end
+    end
+
+    def render_record(data, options = {})
+      render(data, options)
+    end
+
+    def render_records(data, options = {})
+      render(data, options)
+    end
+
+
+    private
 
     def render_generic_error(message, status = '400')
       {
@@ -40,8 +61,6 @@ module GoogleJsonResponse
         }
       }
     end
-
-    private
 
     def is_error?(data)
       return true if data.is_a?(StandardError)

@@ -1,3 +1,12 @@
+begin
+  require 'active_record'
+  require 'active_model'
+  require 'active_model_serializers'
+rescue LoadError
+  raise "This module requires active_record and active_model_serializers"
+end
+
+
 module GoogleJsonResponse
   class ParseActiveRecords
     attr_reader :parsed_data

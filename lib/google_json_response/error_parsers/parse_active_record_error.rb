@@ -1,6 +1,13 @@
+begin
+  require 'active_model'
+  require 'active_record'
+rescue LoadError
+  raise "This module requires active_record and active_model"
+end
+
 module GoogleJsonResponse
   module ErrorParsers
-    class ParseActiveModelError
+    class ParseActiveRecordError
       attr_reader :parsed_data
 
       def initialize(data, options = {})

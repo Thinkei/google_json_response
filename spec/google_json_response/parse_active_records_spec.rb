@@ -1,5 +1,6 @@
 require "spec_helper"
 require 'kaminari'
+require "google_json_response/parse_active_records"
 
 describe GoogleJsonResponse::ParseActiveRecords do
   describe "#call" do
