@@ -1,6 +1,8 @@
 require "spec_helper"
+require "google_json_response/error_parsers"
+require "google_json_response/error_parsers/parse_active_record_error"
 
-describe GoogleJsonResponse::ErrorParsers::ParseActiveModelError do
+describe GoogleJsonResponse::ErrorParsers::ParseActiveRecordError do
   describe "#call" do
     let!(:test_model) {
       stub_const 'TestModel', Class.new
@@ -26,7 +28,7 @@ describe GoogleJsonResponse::ErrorParsers::ParseActiveModelError do
       end
 
       it "renders correctly and the message should not be filtered" do
-        parser = GoogleJsonResponse::ErrorParsers::ParseActiveModelError.new(errors, code: 200)
+        parser = GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors, code: 200)
         parser.call
         result = parser.parsed_data
         expect(result[:error]).to include(code: '200')
@@ -49,7 +51,7 @@ describe GoogleJsonResponse::ErrorParsers::ParseActiveModelError do
         end
 
         it "renders correctly" do
-          parser = GoogleJsonResponse::ErrorParsers::ParseActiveModelError.new(errors, code: 200)
+          parser = GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors, code: 200)
           parser.call
           result = parser.parsed_data
           expect(result[:error]).to include(code: '200')
@@ -71,7 +73,7 @@ describe GoogleJsonResponse::ErrorParsers::ParseActiveModelError do
         end
 
         it "renders correctly" do
-          parser = GoogleJsonResponse::ErrorParsers::ParseActiveModelError.new(errors, code: 200)
+          parser = GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors, code: 200)
           parser.call
           result = parser.parsed_data
           expect(result[:error]).to include(code: '200')
@@ -96,7 +98,7 @@ describe GoogleJsonResponse::ErrorParsers::ParseActiveModelError do
       end
 
       it "keeps the custom messages and removes the default message" do
-        parser = GoogleJsonResponse::ErrorParsers::ParseActiveModelError.new(errors, code: 200)
+        parser = GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors, code: 200)
         parser.call
         result = parser.parsed_data
         expect(result[:error]).to include(code: '200')

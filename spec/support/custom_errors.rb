@@ -3,3 +3,6 @@ class InvalidExampleError < StandardError
     'invalid'
   end
 end
+
+class Invalid2ExampleError < StandardError
+end

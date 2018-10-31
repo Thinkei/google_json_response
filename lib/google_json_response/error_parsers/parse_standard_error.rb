@@ -2,17 +2,14 @@ module GoogleJsonResponse
   module ErrorParsers
     class ParseStandardError
       attr_reader :parsed_data
-      DEFAULT_ERROR_CODE = 'error'
 
       def initialize(data, options = {})
         @options = options
         @code = @options[:code]
         @data = data
-        @errors = []
       end
 
       def call
-        @errors.push()
         @parsed_data = {
           error: {
             code: @code.to_s,
@@ -31,7 +28,7 @@ module GoogleJsonResponse
 
       def parseStandardError(data)
         {
-          reason: data.try(:key) || data.try(:code) || DEFAULT_ERROR_CODE,
+          reason: data.try(:key) || data.try(:code) || data.class.to_s,
           message: data.message,
         }
       end

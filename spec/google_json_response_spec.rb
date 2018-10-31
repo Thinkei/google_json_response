@@ -1,7 +1,98 @@
 require "spec_helper"
 
 describe GoogleJsonResponse do
-  describe ".parse" do
+  describe ".render_record" do
+    let(:service_double) { double({}) }
+
+    after do
+      if GoogleJsonResponse::RecordParsers.constants.include?(:ParseActiveRecords) 
+        GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseActiveRecords)
+      end
+    end
+
+    context "data is a ActiveRecord::Base and parse_active_records is required" do
+      let!(:record_1) { User.new(key: '1', name: "test") }
+
+      it 'calls ParseErrors with correct params' do
+        require "google_json_response/record_parsers/parse_active_records"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_1, { serializer: :test }).and_return(service_double)
+        expect(service_double).to receive(:call)
+        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
+        expect(response).to eq({data: 'test'})
+      end
+    end
+
+    context "data is a ActiveRecord::Base and parse_active_records is not required" do
+      let!(:record_1) { User.new(key: '1', name: "test") }
+
+      it 'throws runtime errror' do
+        expect {
+          response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
+        }.to raise_error(
+               RuntimeError,
+               "Please require google_json_response/active_records"\
+               " to render active records"
+             )
+      end
+    end
+  end
+
+  describe ".render_records" do
+    let(:service_double) { double({}) }
+
+    after do
+      if GoogleJsonResponse::RecordParsers.constants.include?(:ParseActiveRecords) 
+        GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseActiveRecords)
+      end
+    end
+
+    context "data is a ActiveRecord::Relation and parse_active_records is required" do
+      let!(:record_1) { User.create(key: '1', name: "test") }
+      let!(:record_relation) { User.where(name: "test") }
+
+      it 'calls ParseErrors with correct params' do
+        load "google_json_response/record_parsers/parse_active_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
+        expect(service_double).to receive(:call)
+        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        expect(response).to eq({data: 'test'})
+      end
+    end
+
+    context "data is a ActiveRecord::Relation and parse_active_records is not required" do
+      let!(:record_1) { User.create(key: '1', name: "test") }
+      let!(:record_relation) { User.where(name: "test") }
+
+      it 'throw runtime error' do
+        expect {
+          GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        }.to raise_error(
+               RuntimeError,
+               "Please require google_json_response/active_records"\
+               " to render active records"
+             )
+      end
+    end
+
+    context "data is an array of ActiveRecord::Base and parse_active_records is required" do
+      let!(:record_1) { User.new(key: '1', name: "test") }
+      let!(:record_2) { User.new(key: '2', name: "test") }
+      let!(:records) { [record_1, record_2] }
+
+      it 'calls ParseErrors with correct params' do
+        load "google_json_response/record_parsers/parse_active_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
+        expect(service_double).to receive(:call)
+        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_records(records, { serializer: :test })
+        expect(response).to eq({data: 'test'})
+      end
+    end
+  end
+
+  describe ".render_error" do
     let!(:test_model) {
       stub_const 'TestModel', Class.new
       TestModel.class_eval do
@@ -24,10 +115,8 @@ describe GoogleJsonResponse do
       let!(:error_1) { StandardError.new("Error 1") }
 
       it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseErrors).to receive(:new).with(error_1, {}).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(error_1)
+        expect(GoogleJsonResponse::ErrorParsers).to receive(:parse).with(error_1, {}).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_error(error_1)
         expect(response).to eq({data: 'test'})
       end
     end
@@ -38,10 +127,9 @@ describe GoogleJsonResponse do
       let!(:errors) { [error_1, error_2] }
 
       it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseErrors).to receive(:new).with(errors, {}).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(errors)
+        load "google_json_response/error_parsers.rb"
+        expect(GoogleJsonResponse::ErrorParsers).to receive(:parse).with(errors, {}).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_error(errors)
         expect(response).to eq({data: 'test'})
       end
     end
@@ -52,10 +140,9 @@ describe GoogleJsonResponse do
       }
 
       it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseErrors).to receive(:new).with(errors_1, {}).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(errors_1)
+        load "google_json_response/error_parsers.rb"
+        expect(GoogleJsonResponse::ErrorParsers).to receive(:parse).with(errors_1, {}).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_error(errors_1)
         expect(response).to eq({data: 'test'})
       end
     end
@@ -74,80 +161,39 @@ describe GoogleJsonResponse do
       }
 
       it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseErrors).to receive(:new).with(errors_array, {}).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(errors_array)
+        load "google_json_response/error_parsers.rb"
+        expect(GoogleJsonResponse::ErrorParsers).to receive(:parse).with(errors_array, {}).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_error(errors_array)
         expect(response).to eq({data: 'test'})
       end
     end
 
-    context "data is a ActiveRecord::Base" do
-      let!(:record_1) { User.new(key: '1', name: "test") }
+     context "data is a string" do
+       it 'renders a generic error' do
+         response = GoogleJsonResponse.render_error("You can't access this page", code: '401')
+         expect(response).to eq({
+                                  error:{
+                                           code: '401',
+                                           errors: [
+                                             {
+                                               message: "You can't access this page",
+                                               reason: 'error'
+                                             }
+                                           ]
+                                         }
+                                })
+       end
+     end
+  end
 
-      it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(record_1, { serializer: :test }).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(record_1, { serializer: :test })
-        expect(response).to eq({data: 'test'})
-      end
-    end
-
-    context "data is a ActiveRecord::Relation" do
-      let!(:record_1) { User.create(key: '1', name: "test") }
-      let!(:record_relation) { User.where(name: "test") }
-
-      it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(record_relation, { serializer: :test })
-        expect(response).to eq({data: 'test'})
-      end
-    end
-
-    context "data is an array of ActiveRecord::Base" do
-      let!(:record_1) { User.new(key: '1', name: "test") }
-      let!(:record_2) { User.new(key: '2', name: "test") }
-      let!(:records) { [record_1, record_2] }
-
-      it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(records, { serializer: :test })
-        expect(response).to eq({data: 'test'})
-      end
-    end
-
+  describe ".render" do
     context "data is a hash" do
       let!(:hash_1) { {message: 'test'} }
 
       it 'calls ParseErrors with correct params' do
-        expect(GoogleJsonResponse::ParseHash).to receive(:new).with(hash_1, {}).and_return(service_double)
-        expect(service_double).to receive(:call)
-        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
-        response = GoogleJsonResponse.parse(hash_1, {})
-        expect(response).to eq({data: 'test'})
+        response = GoogleJsonResponse.render(hash_1, {})
+        expect(response).to eq({data: {message: 'test'}})
       end
-    end
-  end
-
-  describe ".render_generic_error" do
-    it 'renders error correctly' do
-      response = GoogleJsonResponse.render_generic_error("You can't access this page", '401')
-      expect(response).to eq({
-                               error:{
-                                        code: '401',
-                                        errors: [
-                                          {
-                                            message: "You can't access this page",
-                                            reason: 'error'
-                                          }
-                                        ]
-                                      }
-                             })
     end
   end
 

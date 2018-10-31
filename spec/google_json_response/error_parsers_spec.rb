@@ -1,14 +1,14 @@
 require "spec_helper"
+require "google_json_response/error_parsers"
 
-describe GoogleJsonResponse::ParseErrors do
+describe GoogleJsonResponse::ErrorParsers do
   describe "#call" do
     context "Error is a StandardError" do
       let!(:error_1) { InvalidExampleError.new("Error 1") }
 
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseErrors.new(error_1, code: 200)
-        parser.call
-        expect(parser.parsed_data).to eq({
+        data = GoogleJsonResponse::ErrorParsers.parse(error_1, code: 200)
+        expect(data).to eq({
                                            error:{
                                                     code: '200',
                                                     errors: [
@@ -22,7 +22,7 @@ describe GoogleJsonResponse::ParseErrors do
       end
     end
 
-    context "Error is a ActiveModel error" do
+    context "Error is a ActiveModel error and parse_active_record_error is required" do
       let!(:record_1) { User.new(key: '1', name: "test") }
       let!(:errors_1) {
         ActiveModel::Errors.new(record_1)
@@ -31,10 +31,16 @@ describe GoogleJsonResponse::ParseErrors do
         errors_1.add(:name, :invalid, value: "test2")
       end
 
+      after do
+        if GoogleJsonResponse::ErrorParsers.constants.include?(:ParseActiveRecordError) 
+          GoogleJsonResponse::ErrorParsers.send(:remove_const, :ParseActiveRecordError)
+        end
+      end
+
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseErrors.new(errors_1, code: 200)
-        parser.call
-        expect(parser.parsed_data).to eq({
+        load "google_json_response/error_parsers/parse_active_record_error.rb"
+        data = GoogleJsonResponse::ErrorParsers.parse(errors_1, code: 200)
+        expect(data).to eq({
                                            error:{
                                                     code: '200',
                                                     errors: [
@@ -47,6 +53,32 @@ describe GoogleJsonResponse::ParseErrors do
                                                     ]
                                                   }
                                          })
+      end
+    end
+
+    context "Error is a ActiveModel error and parse_active_record_error is not required" do
+      let!(:record_1) { User.new(key: '1', name: "test") }
+      let!(:errors_1) {
+        ActiveModel::Errors.new(record_1)
+      }
+      before do
+        errors_1.add(:name, :invalid, value: "test2")
+      end
+
+      after do
+        if GoogleJsonResponse::ErrorParsers.constants.include?(:ParseActiveRecordError) 
+          GoogleJsonResponse::ErrorParsers.send(:remove_const, :ParseActiveRecordError)
+        end
+      end
+
+      it 'throws runtime error' do
+        expect {
+          GoogleJsonResponse::ErrorParsers.parse(errors_1, code: 200)
+        }.to raise_error(
+               RuntimeError,
+               "Please require google_json_response/active_records"\
+               " to render active record errors"
+             )
       end
     end
 
@@ -63,10 +95,16 @@ describe GoogleJsonResponse::ParseErrors do
         errors_1.add(:name, :invalid, value: "test2", message: "^Other custom message")
       end
 
+      after do
+        if GoogleJsonResponse::ErrorParsers.constants.include?(:ParseActiveRecordError) 
+          GoogleJsonResponse::ErrorParsers.send(:remove_const, :ParseActiveRecordError)
+        end
+      end
+
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseErrors.new([errors_1, error_2], code: 200)
-        parser.call
-        expect(parser.parsed_data).to eq({
+        load "google_json_response/error_parsers/parse_active_record_error.rb"
+        data = GoogleJsonResponse::ErrorParsers.parse([errors_1, error_2], code: 200)
+        expect(data).to eq({
                                            error:{
                                                     code: '200',
                                                     errors: [
@@ -84,7 +122,7 @@ describe GoogleJsonResponse::ParseErrors do
                                                       },
                                                       {
                                                         message: "Error 2",
-                                                        reason: 'error'
+                                                        reason: 'StandardError'
                                                       }
                                                     ]
                                                   }
