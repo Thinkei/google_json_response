@@ -42,7 +42,7 @@ module GoogleJsonResponse
           parseStandardError(error)
         else is_an_active_model_error?(error)
           if !defined?(GoogleJsonResponse::ErrorParsers::ParseActiveRecordError)
-            raise "Please require google_json_response/error_parsers/parse_active_record_error"\
+            raise "Please require google_json_response/active_records"\
                   " to render active record errors"
           end
           parse_active_model_error(error)

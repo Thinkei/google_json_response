@@ -1,8 +1,8 @@
 require "spec_helper"
 require 'kaminari'
-require "google_json_response/parse_active_records"
+require "google_json_response/record_parsers/parse_active_records"
 
-describe GoogleJsonResponse::ParseActiveRecords do
+describe GoogleJsonResponse::RecordParsers::ParseActiveRecords do
   describe "#call" do
     before :each do
       User.destroy_all
@@ -12,7 +12,7 @@ describe GoogleJsonResponse::ParseActiveRecords do
       let!(:record_1) { User.create(key: '1', name: "test") }
 
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseActiveRecords
+        parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords
                    .new(record_1, { serializer_klass: UserSerializer, include: "**" })
         parser.call
         expect(parser.parsed_data).to eq({
@@ -31,11 +31,11 @@ describe GoogleJsonResponse::ParseActiveRecords do
       let!(:record_relation) { User.where(name: 'test').page(0) }
 
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseActiveRecords
+        parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords
                    .new(record_relation, {
                           serializer_klass: UserSerializer,
                           include: "**",
-                          api_params: {
+                          custom_data: {
                             sort: '+name',
                             item_per_page: 10
                           }
@@ -65,11 +65,11 @@ describe GoogleJsonResponse::ParseActiveRecords do
       let!(:records) { [record_1, record_2, record_3] }
 
       it 'returns parsed data in correct format' do
-        parser = GoogleJsonResponse::ParseActiveRecords
+        parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords
                    .new(records, {
                           serializer_klass: UserSerializer,
                           include: "**",
-                          api_params: {
+                          custom_data: {
                             sort: '+name'
                           }
                         })

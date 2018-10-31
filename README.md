@@ -36,19 +36,14 @@ Or install it yourself as:
     
 Create \<Your project name\>/config/initializers/google_json_response_setup.rb like this:
 ```
-require "google_json_response"
-require "google_json_response/error_parsers" #include this if you want to parse standard errors
-require "google_json_response/error_parsers/parse_active_record_error" #include this if you want to parse active record errors
-require "google_json_response/parse_active_records" #include this if you want to parse active records
+require "google_json_response/active_records" #include this if you want to parse active records or active record errors
 ```
 
 ## Usage
 #### Scenario 1: Parse Active Model errors
 We will need to require necessary dependencies
 ```
-require "google_json_response"
-require "google_json_response/error_parsers"
-require "google_json_response/error_parsers/parse_active_record_error"
+require "google_json_response/active_records"
 ```
 
 We have model User and we have the error handling for model User in CreateUser service
@@ -82,11 +77,6 @@ Here is what we will have from the above code snippet
 ```
 
 #### Scenario 2: Parse standard errors
-We will need to require necessary dependencies
-```
-require "google_json_response"
-require "google_json_response/error_parsers"
-```
 We have a product purchasing service and we want to handling out of stock error.
 We create a custom error class.
 ```ruby
@@ -128,8 +118,7 @@ Here is what we will have from the above code snippet
 #### Scenario 3: Parse active records with active model serializers
 We will need to require necessary dependencies
 ```
-require "google_json_response"
-require "google_json_response/parse_active_records"
+require "google_json_response/active_records"
 ```
 We can parse a single active record object
 ```ruby
@@ -156,7 +145,7 @@ We can parse a active record relation object
 ```ruby
   GoogleJsonResponse.parse_records(
     User.where(name: 'test'), 
-    { serializer_klass: UserSerializer, api_params: { sort: '+name', item_per_page: 10 } }
+    { serializer_klass: UserSerializer, custom_data: { sort: '+name', item_per_page: 10 } }
   ).to_json
 ```
 
@@ -189,12 +178,6 @@ The result will be like this
 ```
 
 #### Scenario 4: Render a generic error message
-We will need to require necessary dependencies
-```
-require "google_json_response"
-require "google_json_response/error_parsers"
-```
-
 Sometimes we will need to render a simple error message at application layer
 ```ruby
   GoogleJsonResponse.render_error("You can't access this page", code: '401').to_json
@@ -215,10 +198,6 @@ The result will be like this
 ```
 
 #### Scenario 5: Render a generic message
-We will need to require necessary dependencies
-```
-require "google_json_response"
-```
 We want to render a hash message like a message to notify end-user about submitting a form successfully
 ```ruby
   GoogleJsonResponse.render({message: 'saved successfully'}).to_json

@@ -76,7 +76,7 @@ describe GoogleJsonResponse::ErrorParsers do
           GoogleJsonResponse::ErrorParsers.parse(errors_1, code: 200)
         }.to raise_error(
                RuntimeError,
-               "Please require google_json_response/error_parsers/parse_active_record_error"\
+               "Please require google_json_response/active_records"\
                " to render active record errors"
              )
       end

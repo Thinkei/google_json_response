@@ -5,8 +5,8 @@ describe GoogleJsonResponse do
     let(:service_double) { double({}) }
 
     after do
-      if Object.const_get(:GoogleJsonResponse).constants.include?(:ParseActiveRecords) 
-        Object.const_get(:GoogleJsonResponse).send(:remove_const, :ParseActiveRecords)
+      if GoogleJsonResponse::RecordParsers.constants.include?(:ParseActiveRecords) 
+        GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseActiveRecords)
       end
     end
 
@@ -14,8 +14,8 @@ describe GoogleJsonResponse do
       let!(:record_1) { User.new(key: '1', name: "test") }
 
       it 'calls ParseErrors with correct params' do
-        require "google_json_response/parse_active_records"
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(record_1, { serializer: :test }).and_return(service_double)
+        require "google_json_response/record_parsers/parse_active_records"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_1, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
         response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
@@ -31,7 +31,7 @@ describe GoogleJsonResponse do
           response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
         }.to raise_error(
                RuntimeError,
-               "Please require google_json_response/parse_active_records"\
+               "Please require google_json_response/active_records"\
                " to render active records"
              )
       end
@@ -42,8 +42,8 @@ describe GoogleJsonResponse do
     let(:service_double) { double({}) }
 
     after do
-      if Object.const_get(:GoogleJsonResponse).constants.include?(:ParseActiveRecords) 
-        Object.const_get(:GoogleJsonResponse).send(:remove_const, :ParseActiveRecords)
+      if GoogleJsonResponse::RecordParsers.constants.include?(:ParseActiveRecords) 
+        GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseActiveRecords)
       end
     end
 
@@ -52,8 +52,8 @@ describe GoogleJsonResponse do
       let!(:record_relation) { User.where(name: "test") }
 
       it 'calls ParseErrors with correct params' do
-        load "google_json_response/parse_active_records.rb"
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
+        load "google_json_response/record_parsers/parse_active_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
         response = GoogleJsonResponse.render_records(record_relation, { serializer: :test })
@@ -70,7 +70,7 @@ describe GoogleJsonResponse do
           GoogleJsonResponse.render_records(record_relation, { serializer: :test })
         }.to raise_error(
                RuntimeError,
-               "Please require google_json_response/parse_active_records"\
+               "Please require google_json_response/active_records"\
                " to render active records"
              )
       end
@@ -82,8 +82,8 @@ describe GoogleJsonResponse do
       let!(:records) { [record_1, record_2] }
 
       it 'calls ParseErrors with correct params' do
-        load "google_json_response/parse_active_records.rb"
-        expect(GoogleJsonResponse::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
+        load "google_json_response/record_parsers/parse_active_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
         response = GoogleJsonResponse.render_records(records, { serializer: :test })
@@ -111,38 +111,17 @@ describe GoogleJsonResponse do
 
     let(:service_double) { double({}) }
 
-    after do
-      if Object.const_get(:GoogleJsonResponse).constants.include?(:ErrorParsers) 
-        Object.const_get(:GoogleJsonResponse).send(:remove_const, :ErrorParsers)
-      end
-    end
-
-    context "data is a StandardError and error_parsers is required" do
+    context "data is a StandardError" do
       let!(:error_1) { StandardError.new("Error 1") }
 
       it 'calls ParseErrors with correct params' do
-        load "google_json_response/error_parsers.rb"
         expect(GoogleJsonResponse::ErrorParsers).to receive(:parse).with(error_1, {}).and_return({data: 'test'})
         response = GoogleJsonResponse.render_error(error_1)
         expect(response).to eq({data: 'test'})
       end
     end
 
-    context "data is a StandardError and error_parsers is not required" do
-      let!(:error_1) { StandardError.new("Error 1") }
-
-      it 'throws runtime error' do
-        expect {
-          GoogleJsonResponse.render_error(error_1)
-        }.to raise_error(
-               RuntimeError,
-               "Please require google_json_response/error_parsers"\
-               " to render errors"
-             )
-      end
-    end
-
-    context "data is an array of StandardError and error_parsers is required" do
+    context "data is an array of StandardError" do
       let!(:error_1) { StandardError.new("Error 1") }
       let!(:error_2) { StandardError.new("Error 2") }
       let!(:errors) { [error_1, error_2] }
@@ -155,7 +134,7 @@ describe GoogleJsonResponse do
       end
     end
 
-    context "data is a ActiveModel::Errors and error_parsers is required" do
+    context "data is a ActiveModel::Errors" do
       let!(:errors_1) {
         ActiveModel::Errors.new(test_model)
       }
@@ -168,7 +147,7 @@ describe GoogleJsonResponse do
       end
     end
 
-    context "data is an array of ActiveModel::Errors and error_parsers is required" do
+    context "data is an array of ActiveModel::Errors" do
       let!(:errors_1) {
         ActiveModel::Errors.new(test_model)
       }

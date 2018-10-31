@@ -1,5 +1,6 @@
 require "google_json_response/version"
 require "google_json_response/parse_hash"
+require "google_json_response/error_parsers"
 
 module GoogleJsonResponse
   class << self
@@ -13,11 +14,11 @@ module GoogleJsonResponse
       end
 
       if is_active_record_object?(data) || is_active_record_objects?(data)
-        if !defined?(GoogleJsonResponse::ParseActiveRecords)
-          raise "Please require google_json_response/parse_active_records"\
+        if !defined?(GoogleJsonResponse::RecordParsers::ParseActiveRecords)
+          raise "Please require google_json_response/active_records"\
                 " to render active records"
         end
-        parser = ParseActiveRecords.new(data, options)
+        parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords.new(data, options)
         parser.call
         return parser.parsed_data
       end
