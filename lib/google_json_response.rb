@@ -65,7 +65,7 @@ module GoogleJsonResponse
 
     def is_error?(data)
       return true if data.is_a?(StandardError)
-      return true if data.is_a?(::ActiveModel::Errors)
+      return true if defined?(::ActiveModel::Errors) && data.is_a?(::ActiveModel::Errors)
       false
     end
 
@@ -80,6 +80,7 @@ module GoogleJsonResponse
     end
 
     def is_active_record_object?(data)
+      return false if !defined?(::ActiveRecord::Base) || !defined?(::ActiveRecord::Relation)
       return data.is_a?(::ActiveRecord::Base) || data.is_a?(::ActiveRecord::Relation)
     end
   end
