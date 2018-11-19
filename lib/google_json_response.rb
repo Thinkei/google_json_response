@@ -23,6 +23,16 @@ module GoogleJsonResponse
         return parser.parsed_data
       end
 
+      if is_sequel_record_object?(data) || is_sequel_record_objects?(data)
+        if !defined?(GoogleJsonResponse::RecordParsers::ParseSequelRecords)
+          raise "Please require google_json_response/sequel_records"\
+                " to render sequel records"
+        end
+        parser = GoogleJsonResponse::RecordParsers::ParseSequelRecords.new(data, options)
+        parser.call
+        return parser.parsed_data
+      end
+
       if data.is_a?(Hash)
         parser = ParseHash.new(data, options)
         parser.call
@@ -82,6 +92,16 @@ module GoogleJsonResponse
     def is_active_record_object?(data)
       return false if !defined?(::ActiveRecord::Base) || !defined?(::ActiveRecord::Relation)
       return data.is_a?(::ActiveRecord::Base) || data.is_a?(::ActiveRecord::Relation)
+    end
+
+    def is_sequel_record_objects?(data)
+      return false if !data.is_a?(::Array)
+      return is_sequel_record_object?(data[0])
+    end
+
+    def is_sequel_record_object?(data)
+      return false if !defined?(::Sequel::Model) || !defined?(::Sequel::Dataset)
+      return data.is_a?(::Sequel::Model) || data.is_a?(::Sequel::Dataset)
     end
   end
 end
