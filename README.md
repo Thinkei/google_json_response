@@ -78,6 +78,8 @@ Here is what we will have from the above code snippet
 ```
 
 #### Scenario 2: Parse standard errors
+Please check [Service error handling wiki](https://github.com/Thinkei/google_json_response/wiki/Service-error-handling) to know how to handle errors in services with the gem.
+
 We have a product purchasing service and we want to handling out of stock error.
 We create a custom error class.
 ```ruby
@@ -213,6 +215,8 @@ The result will be like this
 ```
 
 #### Scenario 6: Render sequel records with active model serializers
+Please check [Setup sequel wiki](https://github.com/Thinkei/google_json_response/wiki/Setup-sequel) to know how to integrate Sequel with your app (for example: pagination integration ...)
+
 We will need to require necessary dependencies
 ```
 require "google_json_response/sequel_records"
