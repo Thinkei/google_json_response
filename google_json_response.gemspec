@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "byebug"
   spec.add_development_dependency 'active_model_serializers', '~> 0.10.0'
   spec.add_development_dependency "kaminari"
+  spec.add_development_dependency "sequel"
 end

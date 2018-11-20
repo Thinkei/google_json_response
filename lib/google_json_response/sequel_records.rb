@@ -1,0 +1,1 @@
+require "google_json_response/record_parsers/parse_sequel_records"

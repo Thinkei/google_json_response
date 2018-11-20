@@ -45,13 +45,17 @@ describe GoogleJsonResponse do
       if GoogleJsonResponse::RecordParsers.constants.include?(:ParseActiveRecords) 
         GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseActiveRecords)
       end
+
+      if GoogleJsonResponse::RecordParsers.constants.include?(:ParseSequelRecords) 
+        GoogleJsonResponse::RecordParsers.send(:remove_const, :ParseSequelRecords)
+      end
     end
 
     context "data is a ActiveRecord::Relation and parse_active_records is required" do
       let!(:record_1) { User.create(key: '1', name: "test") }
       let!(:record_relation) { User.where(name: "test") }
 
-      it 'calls ParseErrors with correct params' do
+      it 'calls ParseActiveRecords with correct params' do
         load "google_json_response/record_parsers/parse_active_records.rb"
         expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
@@ -81,9 +85,64 @@ describe GoogleJsonResponse do
       let!(:record_2) { User.new(key: '2', name: "test") }
       let!(:records) { [record_1, record_2] }
 
-      it 'calls ParseErrors with correct params' do
+      it 'calls ParseActiveRecords with correct params' do
         load "google_json_response/record_parsers/parse_active_records.rb"
         expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
+        expect(service_double).to receive(:call)
+        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_records(records, { serializer: :test })
+        expect(response).to eq({data: 'test'})
+      end
+    end
+
+    context "data is a Sequel::Dataset and parse_sequel_records is required" do
+      before do
+        @items = SequelDB[:items] # Create a dataset
+        @items.insert(:name => 'test', code: '1')
+      end
+      let!(:record_1) { Item.where(name: 'test').first }
+      let!(:record_relation) { Item.where(name: 'test') }
+
+      it 'calls ParseSequelRecords with correct params' do
+        load "google_json_response/record_parsers/parse_sequel_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseSequelRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
+        expect(service_double).to receive(:call)
+        expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
+        response = GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        expect(response).to eq({data: 'test'})
+      end
+    end
+
+    context "data is a Sequel::Dataset and parse_sequel_records is not required" do
+      before do
+        @items = SequelDB[:items] # Create a dataset
+        @items.insert(:name => 'test', code: '1')
+      end
+      let!(:record_1) { Item.where(name: 'test').first }
+      let!(:record_relation) { Item.where(name: 'test') }
+      it 'throw runtime error' do
+        expect {
+          GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        }.to raise_error(
+               RuntimeError,
+               "Please require google_json_response/sequel_records"\
+               " to render sequel records"
+             )
+      end
+    end
+
+    context "data is an array of Sequel::Model and parse_sequel_records is required" do
+      before do
+        @items = SequelDB[:items] # Create a dataset
+        @items.insert(:name => 'test', code: '1')
+        @items.insert(:name => 'test', code: '2')
+      end
+      let!(:record_1) { Item.where(code: '1').first }
+      let!(:record_2) { Item.where(code: '2').first }
+      let!(:records) { [record_1, record_2] }
+      it 'calls ParseSequelRecords with correct params' do
+        load "google_json_response/record_parsers/parse_sequel_records.rb"
+        expect(GoogleJsonResponse::RecordParsers::ParseSequelRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({data: 'test'})
         response = GoogleJsonResponse.render_records(records, { serializer: :test })

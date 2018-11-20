@@ -13,6 +13,7 @@ Parser for APIs following Google JSON style
     - [Scenario 3: Render active records with active model serializers](#scenario-3-parse-active-records-with-active-model-serializers)
     - [Scenario 4: Render a generic error message](#scenario-4-render-a-generic-error-message)
     - [Scenario 5: Render a generic message](#scenario-5-render-a-generic-message)
+    - [Scenario 6: Render sequel records with active model serializers](#scenario-6-render-sequel-records-with-active-model-serializers)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -77,6 +78,8 @@ Here is what we will have from the above code snippet
 ```
 
 #### Scenario 2: Parse standard errors
+Please check [Service error handling wiki](https://github.com/Thinkei/google_json_response/wiki/Service-error-handling) to know how to handle errors in services with the gem.
+
 We have a product purchasing service and we want to handling out of stock error.
 We create a custom error class.
 ```ruby
@@ -209,6 +212,80 @@ The result will be like this
     "message": "saved successfully"
   }
 }
+```
+
+#### Scenario 6: Render sequel records with active model serializers
+Please check [Setup sequel wiki](https://github.com/Thinkei/google_json_response/wiki/Setup-sequel) to know how to integrate Sequel with your app (for example: pagination integration ...)
+
+We will need to require necessary dependencies
+```
+require "google_json_response/sequel_records"
+```
+
+We will need to add method read_attribute_for_serialization to the model we want to render
+```
+class User < Sequel::Model(SequelDB[:users])
+  def read_attribute_for_serialization(name)
+    self.values[name]
+  end
+end
+```
+
+We can parse a single sequel record object
+```ruby
+  GoogleJsonResponse.render_record(record_1, { serializer_klass: UserSerializer }).to_json
+```
+
+The result will be like this
+
+```json
+{
+  "data": {
+    "key": "1",
+    "name": "test"
+  }
+}
+```
+
+We can parse an array of sequel records
+```ruby
+  GoogleJsonResponse.render_records([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
+```
+
+We can parse a sequel dataset object
+```ruby
+  GoogleJsonResponse.render_records(
+    User.where(name: 'test'), 
+    { serializer_klass: UserSerializer, custom_data: { sort: '+name' } }
+  ).to_json
+```
+
+The result will be like this
+```json
+{
+  "data": {
+    "sort": "+name",
+    "item_per_page": 10,
+    "page_index": 1,
+    "total_pages": 1,
+    "total_items": 3,
+    "items": [
+      {
+        "key": "1",
+        "name": "test"
+      },
+      {
+        "key": "2",
+        "name": "test"
+      },
+      {
+        "key": "3",
+        "name": "test"
+      }
+    ]
+  }
+}
+
 ```
 
 ## Development
