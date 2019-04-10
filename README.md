@@ -119,6 +119,7 @@ Here is what we will have from the above code snippet
 ```
 
 #### Scenario 3: Parse active records with active model serializers
+Please check [Date time format for active_model_serializers](https://github.com/Thinkei/google_json_response/wiki/Date-time-format-for-active_model_serializers) to know about how to deal with date time format.  
 We will need to require necessary dependencies
 ```
 require "google_json_response/active_records"
