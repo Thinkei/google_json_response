@@ -20,8 +20,6 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'active_model_serializers', '>= 0.10.0.rc2'
-
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
@@ -30,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "kaminari"
   spec.add_development_dependency "sequel"
+  spec.add_development_dependency 'active_model_serializers', '>= 0.10.0'
 end
