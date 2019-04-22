@@ -60,7 +60,7 @@ module GoogleJsonResponse
           include: "",
           current_member: {}
         )
-        ActiveModelSerializers::SerializableResource.new(
+        ActiveModel::SerializableResource.new(
           collection,
           options
         ).as_json
@@ -73,7 +73,7 @@ module GoogleJsonResponse
           include: "",
           current_member: {}
         )
-        ActiveModelSerializers::SerializableResource.new(
+        ActiveModel::SerializableResource.new(
           resource,
           options
         ).as_json
