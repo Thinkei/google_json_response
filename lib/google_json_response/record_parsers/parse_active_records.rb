@@ -6,18 +6,11 @@ rescue LoadError
   raise "This module requires active_record and active_model_serializers"
 end
 
+require 'google_json_response/record_parsers/parser_base'
+
 module GoogleJsonResponse
   module RecordParsers
-    class ParseActiveRecords
-      attr_reader :parsed_data
-
-      def initialize(data, options = {})
-        @serializer_klass = options[:serializer_klass]
-        @custom_data = options[:custom_data] || {}
-        @options = options.except(:serializer_klass, :custom_data)
-        @data = data
-      end
-
+    class ParseActiveRecords < ParserBase
       def call
         parsed_resource = serializable_resource(@data, @serializer_klass, @options)
 
@@ -61,7 +54,7 @@ module GoogleJsonResponse
           include: "",
           current_member: {}
         )
-        ActiveModel::SerializableResource.new(
+        serializable_resource_klass.new(
           collection,
           options
         ).as_json
@@ -74,7 +67,7 @@ module GoogleJsonResponse
           include: "",
           current_member: {}
         )
-        ActiveModel::SerializableResource.new(
+        serializable_resource_klass.new(
           resource,
           options
         ).as_json
