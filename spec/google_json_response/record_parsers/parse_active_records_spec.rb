@@ -33,21 +33,21 @@ describe GoogleJsonResponse::RecordParsers::ParseActiveRecords do
       it 'returns parsed data in correct format' do
         parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords
                    .new(record_relation, {
-                          serializer_klass: UserSerializer,
-                          include: "**",
-                          custom_data: {
-                            sort: '+name',
-                            item_per_page: 10
-                          }
-                        })
+                     serializer_klass: UserSerializer,
+                     include: "**",
+                     custom_data: {
+                       sort: '+name',
+                       item_per_page: 10
+                     }
+                   })
         parser.call
         expect(parser.parsed_data).to eq({
                                            data: {
                                              item_per_page: 10,
                                              items: [
-                                               {key: "1", name: "test"},
-                                               {key: "2", name: "test"},
-                                               {key: "3", name: "test"}
+                                               { key: "1", name: "test" },
+                                               { key: "2", name: "test" },
+                                               { key: "3", name: "test" }
                                              ],
                                              page_index: 1,
                                              sort: "+name",
@@ -67,27 +67,51 @@ describe GoogleJsonResponse::RecordParsers::ParseActiveRecords do
       it 'returns parsed data in correct format' do
         parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords
                    .new(records, {
-                          serializer_klass: UserSerializer,
-                          include: "**",
-                          custom_data: {
-                            sort: '+name'
-                          }
-                        })
+                     serializer_klass: UserSerializer,
+                     include: "**",
+                     custom_data: {
+                       sort: '+name'
+                     }
+                   })
         parser.call
         expect(parser.parsed_data).to eq({
                                            data: {
-                                             item_per_page: 0,
                                              items: [
-                                               {key: "1", name: "test"},
-                                               {key: "2", name: "test"},
-                                               {key: "3", name: "test"}
+                                               { key: "1", name: "test" },
+                                               { key: "2", name: "test" },
+                                               { key: "3", name: "test" }
                                              ],
-                                             page_index: nil,
-                                             sort: "+name",
-                                             total_items: nil,
-                                             total_pages: nil
+                                             sort: "+name"
                                            }
                                          })
+      end
+    end
+
+    context 'input contains custom_data fields' do
+      let!(:record) { User.create(key: '1', name: "test") }
+      let!(:options) {
+        {
+          serializer_klass: UserSerializer,
+          custom_data: {
+            field_1: 'Field 1',
+            field_2: 'Field 2'
+          }
+        }
+      }
+      let(:result) {
+        {
+          data: {
+            items: [{ key: '1', name: 'test' }],
+            field_1: 'Field 1',
+            field_2: 'Field 2'
+          }
+        }
+      }
+      let(:parser) { described_class.new([record], options) }
+
+      it 'returns parsed data and custom data' do
+        parser.call
+        expect(parser.parsed_data).to eq result
       end
     end
   end
