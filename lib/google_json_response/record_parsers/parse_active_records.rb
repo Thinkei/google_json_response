@@ -1,3 +1,5 @@
+require 'active_record'
+require 'active_model'
 require 'google_json_response/record_parsers/parser_base'
 
 module GoogleJsonResponse

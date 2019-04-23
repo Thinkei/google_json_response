@@ -1,3 +1,4 @@
+require 'sequel'
 require 'google_json_response/record_parsers/parser_base'
 
 module GoogleJsonResponse
