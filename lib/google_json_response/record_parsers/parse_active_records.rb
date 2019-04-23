@@ -1,5 +1,10 @@
-require 'active_record'
-require 'active_model'
+begin
+  require 'active_model'
+  require 'active_record'
+  require 'active_model_serializers'
+rescue LoadError
+  raise "This module requires active_record and active_model_serializers"
+end
 require 'google_json_response/record_parsers/parser_base'
 
 module GoogleJsonResponse

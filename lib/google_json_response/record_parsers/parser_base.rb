@@ -1,5 +1,3 @@
-require 'active_model_serializers'
-
 module GoogleJsonResponse
   module RecordParsers
     class ParserBase
