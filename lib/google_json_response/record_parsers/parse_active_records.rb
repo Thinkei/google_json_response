@@ -12,33 +12,28 @@ module GoogleJsonResponse
   module RecordParsers
     class ParseActiveRecords < ParserBase
       def call
-        parsed_resource = serializable_resource(@data, @serializer_klass, @options)
-
-        if parsed_resource.is_a?(Hash)
+        if serializable_resource.is_a?(Hash)
           @parsed_data = {
-            data: parsed_resource
+            data: serializable_resource
           }
         else
           data = {
             sort: sort,
-            item_per_page: @custom_data[:item_per_page].to_i,
-            page_index: @data.try(:current_page),
-            total_pages: @data.try(:total_pages),
-            total_items: @data.try(:total_count),
-            items: parsed_resource
+            item_per_page: options[:item_per_page].to_i,
+            page_index: record.try(:current_page),
+            total_pages: record.try(:total_pages),
+            total_items: record.try(:total_count),
+            items: serializable_resource
           }
-          data[:status_filter] = { status: @custom_data[:status] } if @options[:status_filter]
           @parsed_data = { data: data }
         end
       end
 
       private
 
-      def serializable_resource(resource, serializer_klass, options = {})
-        if resource.is_a?(ActiveRecord::Relation)
-          return serializable_collection_resource(resource, serializer_klass, options)
-        end
-        super
+      def serializable_resource
+        @serializable_resource ||=
+          record.is_a?(ActiveRecord::Relation) ? serializable_collection_resource : super
       end
     end
   end

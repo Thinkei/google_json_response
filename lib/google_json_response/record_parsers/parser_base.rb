@@ -1,44 +1,41 @@
 module GoogleJsonResponse
   module RecordParsers
     class ParserBase
-      attr_reader :parsed_data
+      attr_reader :parsed_data, :record, :serializer_klass, :options
 
-      def initialize(data, options = {})
+      def initialize(record, options = {})
         @serializer_klass = options[:serializer_klass]
-        @custom_data = options[:custom_data] || {}
-        @options = options.except(:serializer_klass, :custom_data)
-        @data = data
+        @options = options[:custom_data] || {}
+        @record = record
       end
 
       private
 
       def sort
-        return @custom_data[:sort] if @custom_data[:sort]
-        return @custom_data[:sorts].join(',') if @custom_data[:sorts].is_a?(Array)
+        return options[:sort] if options[:sort]
+        return options[:sorts].join(',') if options[:sorts].is_a?(Array)
       end
 
-      def serializable_resource(resource, serializer_klass, options = {})
-        if resource.is_a?(::Array)
-          serializable_collection_resource(resource, serializer_klass, options)
-        else
-          serializable_object_resource(resource, serializer_klass, options)
-        end
+      def serializable_resource
+        @serializable_resource ||=
+          if record.is_a?(::Array)
+            serializable_collection_resource
+          else
+            serializable_object_resource
+          end
       end
 
-      def serializable_collection_resource(collection, serializer_klass, options = {})
+      def serializable_collection_resource
         options.reverse_merge!(
           each_serializer: serializer_klass,
           scope: {},
           include: "",
           current_member: {}
         )
-        serializable_resource_klass.new(
-          collection,
-          options
-        ).as_json
+        serializable_resource_klass.new(record, options).as_json
       end
 
-      def serializable_object_resource(resource, serializer_klass, options = {})
+      def serializable_object_resource
         options.reverse_merge!(
           serializer: serializer_klass,
           scope: {},
@@ -46,7 +43,7 @@ module GoogleJsonResponse
           current_member: {}
         )
         serializable_resource_klass.new(
-          resource,
+          record,
           options
         ).as_json
       end
