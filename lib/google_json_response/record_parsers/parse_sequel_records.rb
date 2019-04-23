@@ -35,6 +35,12 @@ module GoogleJsonResponse
         @serializable_resource ||=
           record.is_a?(Sequel::Dataset) ? serializable_collection_resource : super
       end
+
+      def serializable_collection_resource # has to override for sequel
+        serializer_options = options.reverse_merge(each_serializer: serializer_klass)
+        serializer_options = merge_each_serializer_options(serializer_options)
+        serializable_resource_klass.new(record.to_a, serializer_options).as_json
+      end
     end
   end
 end
