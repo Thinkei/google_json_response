@@ -1,19 +1,20 @@
 module GoogleJsonResponse
   module RecordParsers
     class ParserBase
-      attr_reader :parsed_data, :record, :serializer_klass, :options
+      attr_reader :parsed_data, :record, :serializer_klass, :each_serializer_options, :options
 
       def initialize(record, options = {})
-        @serializer_klass = options[:serializer_klass]
-        @options = options[:custom_data] || {}
         @record = record
+        @serializer_klass = options[:serializer_klass]
+        @each_serializer_options = options[:custom_data]&.delete(:each_serializer_options) || {}
+        @options = options[:custom_data] || {}
       end
 
       private
 
       def sort
         return options[:sort] if options[:sort]
-        return options[:sorts].join(',') if options[:sorts].is_a?(Array)
+        options[:sorts].join(',') if options[:sorts].is_a?(Array)
       end
 
       def serializable_resource
@@ -26,26 +27,20 @@ module GoogleJsonResponse
       end
 
       def serializable_collection_resource
-        options.reverse_merge!(
-          each_serializer: serializer_klass,
-          scope: {},
-          include: "",
-          current_member: {}
-        )
-        serializable_resource_klass.new(record, options).as_json
+        serializer_options = options.reverse_merge(each_serializer: serializer_klass)
+        serializer_options = merge_each_serializer_options(serializer_options)
+        serializable_resource_klass.new(record, serializer_options).as_json
       end
 
       def serializable_object_resource
-        options.reverse_merge!(
-          serializer: serializer_klass,
-          scope: {},
-          include: "",
-          current_member: {}
-        )
-        serializable_resource_klass.new(
-          record,
-          options
-        ).as_json
+        serializer_options = options.reverse_merge(serializer: serializer_klass)
+        serializer_options = merge_each_serializer_options(serializer_options)
+        serializable_resource_klass.new(record, serializer_options).as_json
+      end
+
+      def merge_each_serializer_options(serializer_options)
+        return serializer_options.reverse_merge(each_serializer_options) if each_serializer_options.present?
+        serializer_options.reverse_merge(scope: {}, include: "", current_member: {})
       end
 
       def serializable_resource_klass

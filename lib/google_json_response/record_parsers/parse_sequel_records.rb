@@ -23,7 +23,7 @@ module GoogleJsonResponse
             total_pages: record.try(:page_count),
             total_items: record.try(:pagination_record_count) || record.try(:size),
             items: serializable_resource
-          }
+          }.reverse_merge(options)
           @parsed_data = { data: data }
         end
       end

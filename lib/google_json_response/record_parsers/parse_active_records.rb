@@ -24,7 +24,7 @@ module GoogleJsonResponse
             total_pages: record.try(:total_pages),
             total_items: record.try(:total_count),
             items: serializable_resource
-          }
+          }.reverse_merge(options)
           @parsed_data = { data: data }
         end
       end
