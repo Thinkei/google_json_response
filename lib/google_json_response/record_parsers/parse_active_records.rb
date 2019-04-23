@@ -34,43 +34,11 @@ module GoogleJsonResponse
 
       private
 
-      def sort
-        return @custom_data[:sort] if @custom_data[:sort]
-        return @custom_data[:sorts].join(',') if @custom_data[:sorts].is_a?(Array)
-      end
-
       def serializable_resource(resource, serializer_klass, options = {})
-        if resource.is_a?(ActiveRecord::Relation) || resource.is_a?(::Array)
-          serializable_collection_resource(resource, serializer_klass, options)
-        else
-          serializable_object_resource(resource, serializer_klass, options)
+        if resource.is_a?(ActiveRecord::Relation)
+          return serializable_collection_resource(resource, serializer_klass, options)
         end
-      end
-
-      def serializable_collection_resource(collection, serializer_klass, options = {})
-        options.reverse_merge!(
-          each_serializer: serializer_klass,
-          scope: {},
-          include: "",
-          current_member: {}
-        )
-        serializable_resource_klass.new(
-          collection,
-          options
-        ).as_json
-      end
-
-      def serializable_object_resource(resource, serializer_klass, options = {})
-        options.reverse_merge!(
-          serializer: serializer_klass,
-          scope: {},
-          include: "",
-          current_member: {}
-        )
-        serializable_resource_klass.new(
-          resource,
-          options
-        ).as_json
+        super
       end
     end
   end
