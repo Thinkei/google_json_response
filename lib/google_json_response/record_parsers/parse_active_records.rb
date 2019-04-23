@@ -19,12 +19,12 @@ module GoogleJsonResponse
         else
           data = {
             sort: sort,
-            item_per_page: options[:item_per_page].to_i,
-            page_index: record.try(:current_page),
-            total_pages: record.try(:total_pages),
-            total_items: record.try(:total_count),
+            item_per_page: options[:item_per_page]&.to_i,
+            page_index: options[:page_index]&.to_i || record.try(:current_page),
+            total_pages: options[:total_pages]&.to_i || record.try(:total_pages),
+            total_items: options[:total_items]&.to_i || record.try(:total_count),
             items: serializable_resource
-          }.reverse_merge(options)
+          }.reverse_merge(options).compact
           @parsed_data = { data: data }
         end
       end
