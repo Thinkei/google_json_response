@@ -1,10 +1,3 @@
-begin
-  require 'sequel'
-  require 'active_model_serializers'
-rescue LoadError
-  raise "This module requires sequel and active_model_serializers"
-end
-
 require 'google_json_response/record_parsers/parser_base'
 
 module GoogleJsonResponse

@@ -1,3 +1,8 @@
+require 'sequel'
+require 'active_record'
+require 'active_model'
+require 'active_model_serializers'
+
 module GoogleJsonResponse
   module RecordParsers
     class ParserBase
