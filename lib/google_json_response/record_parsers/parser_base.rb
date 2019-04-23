@@ -29,6 +29,9 @@ module GoogleJsonResponse
       def serializable_collection_resource
         serializer_options = options.reverse_merge(each_serializer: serializer_klass)
         serializer_options = merge_each_serializer_options(serializer_options)
+        if record.is_a?(Sequel::Dataset) # Has to do this because guess what? It's stupid fuckn sequel
+          return serializable_resource_klass.new(record.to_a, serializer_options).as_json
+        end
         serializable_resource_klass.new(record, serializer_options).as_json
       end
 
