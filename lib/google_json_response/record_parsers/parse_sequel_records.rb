@@ -24,7 +24,7 @@ module GoogleJsonResponse
               record.try(:pagination_record_count) ||
               record.try(:size),
             items: serializable_resource
-          }.reverse_merge(options).compact
+          }.reverse_merge(options)
           @parsed_data = { data: data }
         end
       end
@@ -32,14 +32,17 @@ module GoogleJsonResponse
       private
 
       def serializable_resource
-        @serializable_resource ||=
-          record.is_a?(Sequel::Dataset) ? serializable_collection_resource : super
+        if record.is_a?(Sequel::Dataset)
+          @serializable_resource ||=
+            serializable_resource_klass.new(record.to_a, active_model_options).as_json
+        else
+          super
+        end
       end
 
-      def serializable_collection_resource # has to override for sequel
-        serializer_options = options.reverse_merge(each_serializer: serializer_klass)
-        serializer_options = merge_each_serializer_options(serializer_options)
-        serializable_resource_klass.new(record.to_a, serializer_options).as_json
+      def serializer_option
+        return { each_serializer: serializer_klass } if record.is_a?(Sequel::Dataset)
+        super
       end
     end
   end

@@ -19,28 +19,27 @@ module GoogleJsonResponse
 
       def serializable_resource
         @serializable_resource ||=
-          if record.is_a?(::Array)
-            serializable_collection_resource
+          if serializer_klass.blank?
+            record.as_json
           else
-            serializable_object_resource
+            serializable_resource_klass.new(record, active_model_options).as_json(json_options)
           end
       end
 
-      def serializable_collection_resource
-        serializer_options = options.reverse_merge(each_serializer: serializer_klass)
-        serializer_options = merge_each_serializer_options(serializer_options)
-        serializable_resource_klass.new(record, serializer_options).as_json
+      def serializer_option
+        if record.is_a?(::Array)
+          { each_serializer: serializer_klass }
+        else
+          { serializer: serializer_klass }
+        end
       end
 
-      def serializable_object_resource
-        serializer_options = options.reverse_merge(serializer: serializer_klass)
-        serializer_options = merge_each_serializer_options(serializer_options)
-        serializable_resource_klass.new(record, serializer_options).as_json
-      end
+      def active_model_options
+        return @active_model_options if @active_model_options.present?
 
-      def merge_each_serializer_options(serializer_options)
-        return serializer_options.reverse_merge(each_serializer_options) if each_serializer_options.present?
-        serializer_options.reverse_merge(scope: {}, include: "", current_member: {})
+        _merge_options = each_serializer_options || { scope: {}, include: "", current_member: {} }
+        _merge_options.reverse_merge!(serializer_option)
+        @active_model_options = options.reverse_merge(_merge_options)
       end
 
       def serializable_resource_klass
@@ -53,6 +52,22 @@ module GoogleJsonResponse
             'ActiveModelSerializers::SerializableResource'
           end
         Object.const_get(klass_name)
+      end
+
+      def json_options
+        json_options = {}
+        json_options[:fields] = json_fields if json_fields
+        json_options
+      end
+
+      def json_fields
+        return nil if serializer_klass.blank?
+        @json_fields ||=
+          if options[:only].present?
+            Array(options[:only])
+          elsif options[:except].present?
+            serializer_klass._attributes - Array(options[:except])
+          end
       end
     end
   end

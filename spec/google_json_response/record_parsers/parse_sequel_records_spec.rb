@@ -91,12 +91,15 @@ describe GoogleJsonResponse::RecordParsers::ParseSequelRecords do
         expect(parser.parsed_data).to eq({
                                            data: {
                                              items: [
-                                               {code: '1', name: "test"},
-                                               {code: '2', name: "test"},
-                                               {code: '3', name: "test"}
+                                               { code: "1", name: "test" },
+                                               { code: "2", name: "test" },
+                                               { code: "3", name: "test" }
                                              ],
+                                             item_per_page: nil,
+                                             page_index: nil,
                                              sort: "+name",
                                              total_items: 3,
+                                             total_pages: nil
                                            }
                                          })
       end

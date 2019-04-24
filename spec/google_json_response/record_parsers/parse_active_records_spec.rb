@@ -76,12 +76,16 @@ describe GoogleJsonResponse::RecordParsers::ParseActiveRecords do
         parser.call
         expect(parser.parsed_data).to eq({
                                            data: {
+                                             item_per_page: nil,
                                              items: [
                                                { key: "1", name: "test" },
                                                { key: "2", name: "test" },
                                                { key: "3", name: "test" }
                                              ],
-                                             sort: "+name"
+                                             page_index: nil,
+                                             sort: "+name",
+                                             total_items: nil,
+                                             total_pages: nil
                                            }
                                          })
       end
@@ -101,9 +105,16 @@ describe GoogleJsonResponse::RecordParsers::ParseActiveRecords do
       let(:result) {
         {
           data: {
-            items: [{ key: '1', name: 'test' }],
-            field_1: 'Field 1',
-            field_2: 'Field 2'
+            field_1: "Field 1",
+            field_2: "Field 2",
+            item_per_page: nil,
+            items: [
+              { key: "1", name: "test" }
+            ],
+            page_index: nil,
+            sort: nil,
+            total_items: nil,
+            total_pages: nil
           }
         }
       }

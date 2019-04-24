@@ -18,21 +18,21 @@ module GoogleJsonResponse
         else
           data = {
             sort: sort,
-            item_per_page: options[:item_per_page]&.to_i,
+            item_per_page: options[:item_per_page]&.to_i || record.try(:limit_value),
             page_index: options[:page_index]&.to_i || record.try(:current_page),
             total_pages: options[:total_pages]&.to_i || record.try(:total_pages),
             total_items: options[:total_items]&.to_i || record.try(:total_count),
             items: serializable_resource
-          }.reverse_merge(options).compact
+          }.reverse_merge(options)
           @parsed_data = { data: data }
         end
       end
 
       private
 
-      def serializable_resource
-        @serializable_resource ||=
-          record.is_a?(ActiveRecord::Relation) ? serializable_collection_resource : super
+      def serializer_option
+        return { each_serializer: serializer_klass } if record.is_a?(ActiveRecord::Relation)
+        super
       end
     end
   end
