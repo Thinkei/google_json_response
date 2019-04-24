@@ -19,7 +19,11 @@ module GoogleJsonResponse
 
       def serializable_resource
         @serializable_resource ||=
-          serializable_resource_klass.new(record, active_model_options).as_json
+          if serializer_klass.blank?
+            record.as_json
+          else
+            serializable_resource_klass.new(record, active_model_options).as_json(json_options)
+          end
       end
 
       def serializer_option
@@ -48,6 +52,22 @@ module GoogleJsonResponse
             'ActiveModelSerializers::SerializableResource'
           end
         Object.const_get(klass_name)
+      end
+
+      def json_options
+        json_options = {}
+        json_options[:fields] = json_fields if json_fields
+        json_options
+      end
+
+      def json_fields
+        return nil if serializer_klass.blank?
+        @json_fields ||=
+          if options[:only].present?
+            Array(options[:only])
+          elsif options[:except].present?
+            serializer_klass._attributes - Array(options[:except])
+          end
       end
     end
   end
