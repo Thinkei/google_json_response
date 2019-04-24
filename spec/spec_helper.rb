@@ -4,7 +4,6 @@ require 'active_model'
 require 'active_record'
 require 'active_model_serializers'
 require 'sequel'
-require 'google_json_response/active_records'
 
 #Active record test data
 ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
