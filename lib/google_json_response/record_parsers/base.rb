@@ -1,6 +1,6 @@
 module GoogleJsonResponse
   module RecordParsers
-    class ParserBase
+    class Base
       attr_reader :parsed_data, :record, :serializer_klass, :each_serializer_options, :options
 
       def initialize(record, options = {})
