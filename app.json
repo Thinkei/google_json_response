@@ -1,6 +1,6 @@
 {
   "name": "google_json_response",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "documents": [
     {
       "name": "Parser for APIs following Google JSON style",
