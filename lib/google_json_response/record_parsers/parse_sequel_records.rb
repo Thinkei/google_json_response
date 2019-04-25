@@ -9,26 +9,18 @@ require 'google_json_response/record_parsers/base'
 module GoogleJsonResponse
   module RecordParsers
     class ParseSequelRecords < Base
-      def call
-        data =
-          if serializable_resource.is_a?(Hash)
-            serializable_resource
-          else
-            {
-              sort: sort,
-              item_per_page: record.try(:page_size) || options[:item_per_page]&.to_i,
-              page_index: options[:page_index]&.to_i || record.try(:current_page),
-              total_pages: options[:total_pages]&.to_i || record.try(:page_count),
-              total_items: options[:total_items]&.to_i ||
-                record.try(:pagination_record_count) ||
-                record.try(:size),
-              items: serializable_resource
-            }.reverse_merge(options)
-          end
-        @parsed_data = { data: data }
-      end
-
       private
+
+      def pagination_data
+        {
+          item_per_page: record.try(:page_size) || options[:item_per_page]&.to_i,
+          page_index: options[:page_index]&.to_i || record.try(:current_page),
+          total_pages: options[:total_pages]&.to_i || record.try(:page_count),
+          total_items: options[:total_items]&.to_i ||
+            record.try(:pagination_record_count) ||
+            record.try(:size)
+        }
+      end
 
       def serializable_resource
         if record.is_a?(Sequel::Dataset)

@@ -10,11 +10,34 @@ module GoogleJsonResponse
         @options = options[:custom_data] || {}
       end
 
+      def call
+        data =
+          if serializable_resource.is_a?(Hash)
+            serializable_resource
+          else
+            { items: serializable_resource }
+              .merge(sort_data)
+              .merge(pagination_data)
+          end
+        data.reverse_merge!(options)
+        @parsed_data = { data: data }
+      end
+
       private
 
-      def sort
-        return options[:sort] if options[:sort]
-        options[:sorts].join(',') if options[:sorts].is_a?(Array)
+      def pagination_data
+        {
+          item_per_page: options[:item_per_page]&.to_i,
+          page_index: options[:page_index]&.to_i,
+          total_pages: options[:total_pages]&.to_i,
+          total_items: options[:total_items]&.to_i
+        }
+      end
+
+      def sort_data
+        return { sort: options[:sort] } if options[:sort]
+        return { sort: options[:sorts].join(',') } if options[:sorts].is_a?(Array)
+        { sort: nil }
       end
 
       def serializable_resource
