@@ -35,21 +35,9 @@ module GoogleJsonResponse
     end
 
     def render_error(data, options = {})
-      if data.is_a?(String)
-        render_generic_error(data, options[:code])
-      else
-        render(data, options)
-      end
-    end
-
-    def render_record(data, options = {})
+      return render_generic_error(data, options[:code]) if data.is_a?(String)
       render(data, options)
     end
-
-    def render_records(data, options = {})
-      render(data, options)
-    end
-
 
     private
 

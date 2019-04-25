@@ -1,7 +1,7 @@
 require "spec_helper"
 
 describe GoogleJsonResponse do
-  describe ".render_record" do
+  describe ".render single record" do
     let(:service_double) { double({}) }
 
     after do
@@ -18,7 +18,7 @@ describe GoogleJsonResponse do
         expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_1, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({ data: 'test' })
-        response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
+        response = GoogleJsonResponse.render(record_1, { serializer: :test })
         expect(response).to eq({ data: 'test' })
       end
     end
@@ -28,7 +28,7 @@ describe GoogleJsonResponse do
 
       it 'throws runtime errror' do
         expect {
-          response = GoogleJsonResponse.render_record(record_1, { serializer: :test })
+          response = GoogleJsonResponse.render(record_1, { serializer: :test })
         }.to raise_error(
                RuntimeError,
                "Please require google_json_response/active_records"\
@@ -38,7 +38,7 @@ describe GoogleJsonResponse do
     end
   end
 
-  describe ".render_records" do
+  describe ".render collections" do
     let(:service_double) { double({}) }
 
     after do
@@ -58,7 +58,7 @@ describe GoogleJsonResponse do
         expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({ data: 'test' })
-        response = GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        response = GoogleJsonResponse.render(record_relation, { serializer: :test })
         expect(response).to eq({ data: 'test' })
       end
     end
@@ -69,7 +69,7 @@ describe GoogleJsonResponse do
 
       it 'throw runtime error' do
         expect {
-          GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+          GoogleJsonResponse.render(record_relation, { serializer: :test })
         }.to raise_error(
                RuntimeError,
                "Please require google_json_response/active_records"\
@@ -88,7 +88,7 @@ describe GoogleJsonResponse do
         expect(GoogleJsonResponse::RecordParsers::ParseActiveRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({ data: 'test' })
-        response = GoogleJsonResponse.render_records(records, { serializer: :test })
+        response = GoogleJsonResponse.render(records, { serializer: :test })
         expect(response).to eq({ data: 'test' })
       end
     end
@@ -106,7 +106,7 @@ describe GoogleJsonResponse do
         expect(GoogleJsonResponse::RecordParsers::ParseSequelRecords).to receive(:new).with(record_relation, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({ data: 'test' })
-        response = GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+        response = GoogleJsonResponse.render(record_relation, { serializer: :test })
         expect(response).to eq({ data: 'test' })
       end
     end
@@ -120,7 +120,7 @@ describe GoogleJsonResponse do
       let!(:record_relation) { Item.where(name: 'test') }
       it 'throw runtime error' do
         expect {
-          GoogleJsonResponse.render_records(record_relation, { serializer: :test })
+          GoogleJsonResponse.render(record_relation, { serializer: :test })
         }.to raise_error(
                RuntimeError,
                "Please require google_json_response/sequel_records"\
@@ -143,7 +143,7 @@ describe GoogleJsonResponse do
         expect(GoogleJsonResponse::RecordParsers::ParseSequelRecords).to receive(:new).with(records, { serializer: :test }).and_return(service_double)
         expect(service_double).to receive(:call)
         expect(service_double).to receive(:parsed_data).and_return({ data: 'test' })
-        response = GoogleJsonResponse.render_records(records, { serializer: :test })
+        response = GoogleJsonResponse.render(records, { serializer: :test })
         expect(response).to eq({ data: 'test' })
       end
     end
