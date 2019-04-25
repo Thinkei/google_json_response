@@ -1,5 +1,6 @@
 require "google_json_response/version"
 require "google_json_response/error_parsers"
+require "google_json_response/record_parsers/parse_hash_records"
 
 module GoogleJsonResponse
   class << self
