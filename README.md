@@ -126,7 +126,7 @@ require "google_json_response/active_records"
 ```
 We can parse a single active record object
 ```ruby
-  GoogleJsonResponse.render_record(record_1, { serializer_klass: UserSerializer }).to_json
+  GoogleJsonResponse.render(record_1, { serializer_klass: UserSerializer }).to_json
 ```
 
 The result will be like this
@@ -142,12 +142,12 @@ The result will be like this
 
 We can parse an array of active records
 ```ruby
-  GoogleJsonResponse.render_records([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
+  GoogleJsonResponse.render([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
 ```
 
 We can parse a active record relation object
 ```ruby
-  GoogleJsonResponse.render_records(
+  GoogleJsonResponse.render(
     User.where(name: 'test'), 
     { serializer_klass: UserSerializer, custom_data: { sort: '+name', item_per_page: 10 } }
   ).to_json
@@ -234,7 +234,7 @@ end
 
 We can parse a single sequel record object
 ```ruby
-  GoogleJsonResponse.render_record(record_1, { serializer_klass: UserSerializer }).to_json
+  GoogleJsonResponse.render(record_1, { serializer_klass: UserSerializer }).to_json
 ```
 
 The result will be like this
@@ -250,12 +250,12 @@ The result will be like this
 
 We can parse an array of sequel records
 ```ruby
-  GoogleJsonResponse.render_records([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
+  GoogleJsonResponse.render([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
 ```
 
 We can parse a sequel dataset object
 ```ruby
-  GoogleJsonResponse.render_records(
+  GoogleJsonResponse.render(
     User.where(name: 'test'), 
     { serializer_klass: UserSerializer, custom_data: { sort: '+name' } }
   ).to_json
