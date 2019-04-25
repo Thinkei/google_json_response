@@ -1,11 +1,11 @@
 require "spec_helper"
-require "google_json_response/record_parsers/parser_base"
+require "google_json_response/record_parsers/base"
 
 class DummySerializer < ActiveModel::Serializer
   attributes :id, :name, :email
 end
 
-describe GoogleJsonResponse::RecordParsers::ParserBase do
+describe GoogleJsonResponse::RecordParsers::Base do
   let(:parser) { described_class.new(record, options) }
   let(:record) { OpenStruct.new(id: 1, name: 'Name', email: 'serializer@eh.com') }
   let(:options) { { serializer_klass: DummySerializer }.merge(custom_data) }

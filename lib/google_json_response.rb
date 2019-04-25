@@ -1,43 +1,36 @@
 require "google_json_response/version"
-require "google_json_response/parse_hash"
 require "google_json_response/error_parsers"
 
 module GoogleJsonResponse
   class << self
     def render(data, options = {})
       if is_error?(data) || is_errors?(data)
-        if !defined?(GoogleJsonResponse::ErrorParsers)
+        unless defined?(GoogleJsonResponse::ErrorParsers)
           raise "Please require google_json_response/error_parsers"\
                 " to render errors"
         end
         return ErrorParsers.parse(data, options)
       end
 
-      if is_active_record_object?(data) || is_active_record_objects?(data)
-        if !defined?(GoogleJsonResponse::RecordParsers::ParseActiveRecords)
-          raise "Please require google_json_response/active_records"\
+      parser =
+        if is_active_record_object?(data) || is_active_record_objects?(data)
+          unless defined?(GoogleJsonResponse::RecordParsers::ParseActiveRecords)
+            raise "Please require google_json_response/active_records"\
                 " to render active records"
-        end
-        parser = GoogleJsonResponse::RecordParsers::ParseActiveRecords.new(data, options)
-        parser.call
-        return parser.parsed_data
-      end
-
-      if is_sequel_record_object?(data) || is_sequel_record_objects?(data)
-        if !defined?(GoogleJsonResponse::RecordParsers::ParseSequelRecords)
-          raise "Please require google_json_response/sequel_records"\
+          end
+          GoogleJsonResponse::RecordParsers::ParseActiveRecords.new(data, options)
+        elsif is_sequel_record_object?(data) || is_sequel_record_objects?(data)
+          unless defined?(GoogleJsonResponse::RecordParsers::ParseSequelRecords)
+            raise "Please require google_json_response/sequel_records"\
                 " to render sequel records"
+          end
+          GoogleJsonResponse::RecordParsers::ParseSequelRecords.new(data, options)
+        else
+          GoogleJsonResponse::RecordParsers::ParseHashRecords.new(data, options)
         end
-        parser = GoogleJsonResponse::RecordParsers::ParseSequelRecords.new(data, options)
-        parser.call
-        return parser.parsed_data
-      end
 
-      if data.is_a?(Hash)
-        parser = ParseHash.new(data, options)
-        parser.call
-        return parser.parsed_data
-      end
+      parser.call
+      parser.parsed_data
     end
 
     def render_error(data, options = {})
@@ -80,28 +73,28 @@ module GoogleJsonResponse
     end
 
     def is_errors?(data)
-      return false if !data.is_a?(::Array)
-      return is_error?(data[0])
+      return false unless data.is_a?(::Array)
+      is_error?(data[0])
     end
 
     def is_active_record_objects?(data)
-      return false if !data.is_a?(::Array)
-      return is_active_record_object?(data[0])
+      return false unless data.is_a?(::Array)
+      is_active_record_object?(data[0])
     end
 
     def is_active_record_object?(data)
       return false if !defined?(::ActiveRecord::Base) || !defined?(::ActiveRecord::Relation)
-      return data.is_a?(::ActiveRecord::Base) || data.is_a?(::ActiveRecord::Relation)
+      data.is_a?(::ActiveRecord::Base) || data.is_a?(::ActiveRecord::Relation)
     end
 
     def is_sequel_record_objects?(data)
-      return false if !data.is_a?(::Array)
-      return is_sequel_record_object?(data[0])
+      return false unless data.is_a?(::Array)
+      is_sequel_record_object?(data[0])
     end
 
     def is_sequel_record_object?(data)
       return false if !defined?(::Sequel::Model) || !defined?(::Sequel::Dataset)
-      return data.is_a?(::Sequel::Model) || data.is_a?(::Sequel::Dataset)
+      data.is_a?(::Sequel::Model) || data.is_a?(::Sequel::Dataset)
     end
   end
 end
