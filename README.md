@@ -1,6 +1,7 @@
 # GoogleJsonResponse
 
-Parser for APIs following Google JSON style
+Parser for APIs following Google JSON style  
+Please note that the term "code" in this gem is not HTTP code (obviously you can use it as for HTTP code if you want)
 
 ## Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 orderedList:0 -->
