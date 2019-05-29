@@ -12,8 +12,8 @@ module GoogleJsonResponse
           error: {
             errors: [
               {
-                reason: data.try(:key) || data.try(:code) || data.class.to_s,
-                message: data.message,
+                reason: error.try(:key) || error.try(:code) || error.class.to_s,
+                message: error.message,
               }
             ]
           }

@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "kaminari"
   spec.add_development_dependency "sequel"
   spec.add_development_dependency 'active_model_serializers', '>= 0.10.0'
+  spec.add_development_dependency 'database_cleaner'
 end

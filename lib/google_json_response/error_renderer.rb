@@ -37,17 +37,17 @@ module GoogleJsonResponse
     end
 
     def standard_error?
-      return true if data.is_a?(StandardError)
+      return true if errors.is_a?(StandardError)
       false
     end
 
     def active_model_error?
       return false unless defined?(::ActiveModel::Errors)
-      data.is_a?(::ActiveModel::Errors)
+      errors.is_a?(::ActiveModel::Errors)
     end
 
     def generic_error?
-      data.is_a?(::String) || data.is_a?(::Array)
+      errors.is_a?(::String) || errors.is_a?(::Array)
     end
   end
 end

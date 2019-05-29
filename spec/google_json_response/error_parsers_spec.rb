@@ -1,13 +1,13 @@
 require "spec_helper"
-require "google_json_response/error_parsers"
+require "google_json_response/error_renderer"
 
-describe GoogleJsonResponse::ErrorParsers do
+describe GoogleJsonResponse::ErrorRenderer do
   describe "#call" do
     context "Error is a StandardError" do
       let!(:error_1) { InvalidExampleError.new("Error 1") }
 
       it 'returns parsed data in correct format' do
-        data = GoogleJsonResponse::ErrorParsers.parse(error_1, code: 200)
+        data = GoogleJsonResponse::ErrorRenderer.render(error_1)
         expect(data).to eq({
                                            error:{
                                                     code: '200',
