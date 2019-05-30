@@ -103,6 +103,14 @@ Now we want to render the error at the application layer (Rails controller for e
     render json: GoogleJsonResponse.render_error(service.errors).to_json, status: 500
   end
 ```
+
+Or render the error at the application layer of Sinatra  
+```ruby
+  if !service.success?
+    return GoogleJsonResponse.render_error(service.errors).to_json
+  end
+```
+
 Here is what we will have from the above code snippet
 ```json
 {
