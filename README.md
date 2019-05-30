@@ -6,7 +6,6 @@ Please note that the term "code" in this gem is not HTTP code (obviously you can
 ## Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 orderedList:0 -->
 
-
 - [Installation](#installation)
 - [Usage](#usage)
     - [Scenario 1: Render Active Model errors](#scenario-1-parse-active-model-errors)
@@ -101,14 +100,21 @@ We use the custom error class in our purchasing service.
 Now we want to render the error at the application layer (Rails controller for example)
 ```ruby
   if !service.success?
-    return GoogleJsonResponse.render_error(service.errors, code: 400).to_json
+    render json: GoogleJsonResponse.render_error(service.errors).to_json, status: 500
   end
 ```
+
+Or render the error at the application layer of Sinatra  
+```ruby
+  if !service.success?
+    return GoogleJsonResponse.render_error(service.errors).to_json
+  end
+```
+
 Here is what we will have from the above code snippet
 ```json
 {
   "error": {
-    "code": "400",
     "errors": [
       {
         "reason": "out_of_stock",
@@ -143,14 +149,14 @@ The result will be like this
 
 We can parse an array of active records
 ```ruby
-  GoogleJsonResponse.render([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
+  GoogleJsonResponse.render(array_of_records, { serializer_klass: UserSerializer, custom_data: { include: "**" } }).to_json
 ```
 
 We can parse a active record relation object
 ```ruby
   GoogleJsonResponse.render(
-    User.where(name: 'test'), 
-    { serializer_klass: UserSerializer, custom_data: { sort: '+name', item_per_page: 10 } }
+    User.where(name: 'test'),
+    serializer_klass: UserSerializer, custom_data: { sort: '+name', item_per_page: 10 }
   ).to_json
 ```
 
@@ -185,13 +191,12 @@ The result will be like this
 #### Scenario 4: Render a generic error message
 Sometimes we will need to render a simple error message at application layer
 ```ruby
-  GoogleJsonResponse.render_error("You can't access this page", code: '401').to_json
+  GoogleJsonResponse.render_error("You can't access this page").to_json
 ```
 The result will be like this
 ```json
 {
   "error": {
-    "code": "401",
     "errors": [
       {
         "reason": "error",
@@ -235,7 +240,7 @@ end
 
 We can parse a single sequel record object
 ```ruby
-  GoogleJsonResponse.render(record_1, { serializer_klass: UserSerializer }).to_json
+  GoogleJsonResponse.render(record, { serializer_klass: UserSerializer }).to_json
 ```
 
 The result will be like this
@@ -251,14 +256,14 @@ The result will be like this
 
 We can parse an array of sequel records
 ```ruby
-  GoogleJsonResponse.render([record_1, record_2, record_3], { serializer_klass: UserSerializer, include: "**" }).to_json
+  GoogleJsonResponse.render(records_array, { serializer_klass: UserSerializer, custom_data: { include: "**" } }).to_json
 ```
 
 We can parse a sequel dataset object
 ```ruby
   GoogleJsonResponse.render(
     User.where(name: 'test'), 
-    { serializer_klass: UserSerializer, custom_data: { sort: '+name' } }
+    serializer_klass: UserSerializer, custom_data: { sort: '+name' }
   ).to_json
 ```
 

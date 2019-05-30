@@ -37,7 +37,7 @@ module GoogleJsonResponse
       def sort_data
         return { sort: options[:sort] } if options[:sort]
         return { sort: options[:sorts].join(',') } if options[:sorts].is_a?(Array)
-        { sort: nil }
+        {}
       end
 
       def serializable_resource

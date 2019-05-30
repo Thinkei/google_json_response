@@ -1,41 +1,23 @@
 module GoogleJsonResponse
   module ErrorParsers
     class ParseStandardError
-      attr_reader :parsed_data
+      attr_reader :parsed_data, :error
 
-      def initialize(data, options = {})
-        @options = options
-        @code = @options[:code]
-        @data = data
+      def initialize(error)
+        @error = error
       end
 
       def call
         @parsed_data = {
           error: {
-            code: @code.to_s,
-            errors: parse_errors
+            errors: [
+              {
+                reason: error.try(:key) || error.try(:code) || error.class.to_s,
+                message: error.message,
+              }
+            ]
           }
         }
-      end
-
-      private
-
-      def parse_errors
-        if is_a_standard_error?(@data)
-          [parseStandardError(@data)]
-        end
-      end
-
-      def parseStandardError(data)
-        {
-          reason: data.try(:key) || data.try(:code) || data.class.to_s,
-          message: data.message,
-        }
-      end
-
-      def is_a_standard_error?(data)
-        return true if data.is_a?(StandardError)
-        false
       end
     end
   end

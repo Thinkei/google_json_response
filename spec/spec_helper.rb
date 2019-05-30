@@ -4,6 +4,7 @@ require 'active_model'
 require 'active_record'
 require 'active_model_serializers'
 require 'sequel'
+require 'database_cleaner'
 
 #Active record test data
 ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
@@ -18,6 +19,7 @@ SequelDB = Sequel.sqlite # memory database, requires sqlite3
 SequelDB.extension(:pagination)
 require 'sequel/plugins/serialization'
 require 'json'
+
 SequelDB.create_table :items do
   primary_key :id
   String :name
@@ -34,7 +36,15 @@ class ItemSerializer < ActiveModel::Serializer
   attributes :code, :name
 end
 
+RSpec.configure do |config|
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :truncation
+    DatabaseCleaner.clean_with(:truncation)
+  end
 
-
-
-
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+end
