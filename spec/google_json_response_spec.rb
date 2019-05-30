@@ -106,7 +106,84 @@ describe GoogleJsonResponse do
     end
   end
 
-  describe ".render_error" do
+  describe "Generic Record Rendering" do
+    context "data is a string" do
+      let(:string) { "This is a String" }
+      let(:result) {
+        { data:
+            {
+              item_per_page: nil,
+              items: "This is a String",
+              page_index: nil,
+              total_items: nil,
+              total_pages: nil
+            }
+        }.with_indifferent_access
+      }
+
+      it 'parse correctly' do
+        response = GoogleJsonResponse.render(string).with_indifferent_access
+        expect(response).to eq result
+      end
+    end
+
+    context "data is a hash" do
+      let(:hash) { { message: 'test' } }
+      let(:result) { { data: { message: 'test' } }.with_indifferent_access }
+
+      it 'parse correctly with correct params' do
+        response = GoogleJsonResponse.render(hash, {}).with_indifferent_access
+        expect(response).to eq result
+      end
+    end
+
+    context 'data is an array of hash' do
+      let(:hash_array) { [{ message: 'test', source: 'human' }] }
+      let(:result) {
+        {
+          data: {
+            item_per_page: nil,
+            items: [{ message: "test", source: "human" }],
+            key: "value",
+            page_index: nil,
+            total_items: nil,
+            total_pages: nil
+          }
+        }.with_indifferent_access
+      }
+
+      it 'parse correctly with correct params' do
+        response = GoogleJsonResponse.render(hash_array, custom_data: { key: 'value' }).with_indifferent_access
+        expect(response).to eq result
+      end
+    end
+  end
+
+  describe "Standard Error Rendering" do
+    context "data is a StandardError" do
+      let!(:error) { StandardError.new("Error") }
+
+      it 'calls ParseErrors with correct params' do
+        response = GoogleJsonResponse.render_error(error)
+        expect(response)
+          .to eq({ error: { errors: [{ message: "Error", reason: "StandardError" }] } })
+      end
+    end
+
+    context "data is an array of StandardError" do
+      let!(:error_1) { StandardError.new("Error 1") }
+      let!(:error_2) { StandardError.new("Error 2") }
+      let!(:errors) { [error_1, error_2] }
+
+      it 'calls ParseErrors with correct params' do
+        response = GoogleJsonResponse.render_error(errors)
+        expect(response)
+          .to eq({ error: { errors: [{ message: "Error 1" }, { message: "Error 2" }] } })
+      end
+    end
+  end
+
+  describe "Active Model Errors Rendering" do
     let!(:test_model) {
       stub_const 'TestModel', Class.new
       TestModel.class_eval do
@@ -122,28 +199,6 @@ describe GoogleJsonResponse do
       end
       TestModel.new(id: 1, email: "test@test.com", first_name: "a")
     }
-
-    context "data is a StandardError" do
-      let!(:error) { StandardError.new("Error 1") }
-
-      it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(error)
-        expect(response)
-          .to eq({ error: { errors: [{ message: "Error 1", reason: "StandardError" }] } })
-      end
-    end
-
-    context "data is an array of StandardError" do
-      let!(:error_1) { StandardError.new("Error 1") }
-      let!(:error_2) { StandardError.new("Error 2") }
-      let!(:errors) { [error_1, error_2] }
-
-      it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(errors)
-        expect(response)
-          .to eq({ error: { errors: [{ message: "Error 1" }, { message: "Error 2" }] } })
-      end
-    end
 
     context 'ActiveModel::Error' do
       let!(:error) { ActiveModel::Errors.new(test_model) }
@@ -182,12 +237,65 @@ describe GoogleJsonResponse do
         end
       end
     end
+  end
 
-    context "data is a string" do
-      it 'renders a generic error' do
+  describe "Render Generic Errors" do
+    context "String Type Errors" do
+      it 'renders a single string error correctly' do
         response = GoogleJsonResponse.render_error("You can't access this page")
         expect(response)
           .to eq({ error: { errors: [{ message: "You can't access this page" }] } })
+      end
+
+      context 'data is an array of Strings' do
+        let(:string_array) { ['Error 1', 'Error 2'] }
+
+        it 'renders correctly' do
+          expect(GoogleJsonResponse.render_error(string_array))
+            .to eq({ error: { errors: [{ message: 'Error 1'}, { message: 'Error 2' }] } })
+        end
+      end
+    end
+
+    context "Hash Type Error" do
+      let(:complied_hash) { { message: 'Error' } }
+      let(:not_complied_hash) { { random_key: 'Error' } }
+
+      it 'renders hash error correctly' do
+        expect(GoogleJsonResponse.render_error(complied_hash))
+          .to eq({ error: { errors: [{ message: 'Error' }] } })
+        expect(GoogleJsonResponse.render_error(not_complied_hash))
+          .to eq({ error: { errors: [{ message: 'Unknown Error!' }] } })
+      end
+
+      context 'data is an array of hash' do
+        let(:hash_array) { [complied_hash, not_complied_hash] }
+
+        it 'renders correctly' do
+          expect(GoogleJsonResponse.render_error(hash_array))
+            .to eq({ error: { errors: [{ message: 'Error'}, { message: 'Unknown Error!' }] } })
+        end
+      end
+    end
+
+    context 'Generic Object Type Error' do
+      let(:complied_object) { OpenStruct.new(message: 'Error') }
+      let(:not_complied_object) { OpenStruct.new(random_attribute: 'Error') }
+
+      it 'renders correctly' do
+        expect(GoogleJsonResponse.render_error(complied_object))
+          .to eq({ error: { errors: [{ message: 'Error' }] } })
+        expect(GoogleJsonResponse.render_error(not_complied_object))
+          .to eq({ error: { errors: [{ message: 'Unknown Error!' }] } })
+      end
+
+      context 'data is an array of generic object type' do
+        let(:objects_array) { [complied_object, not_complied_object] }
+
+        it 'renders correctly' do
+          expect(GoogleJsonResponse.render_error(objects_array))
+            .to eq({ error: { errors: [{ message: 'Error'}, { message: 'Unknown Error!' }] } })
+        end
       end
     end
   end
