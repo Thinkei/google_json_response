@@ -6,12 +6,6 @@ module GoogleJsonResponse
   class ErrorRenderer
     attr_reader :errors, :rendered_content
 
-    def self.render(errors)
-      renderer = GoogleJsonResponse::ErrorRenderer.new(errors)
-      renderer.call
-      renderer.rendered_content
-    end
-
     def initialize(errors)
       @errors = errors
     end
@@ -26,7 +20,7 @@ module GoogleJsonResponse
     attr_reader :errors
 
     def parser
-      @parser =
+      @parser ||=
         if standard_error?
           GoogleJsonResponse::ErrorParsers::ParseStandardError.new(errors)
         elsif active_model_error?

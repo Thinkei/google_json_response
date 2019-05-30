@@ -4,12 +4,6 @@ module GoogleJsonResponse
   class RecordRenderer
     attr_reader :data, :options, :rendered_content
 
-    def self.render(data, options = {})
-      renderer = GoogleJsonResponse::RecordRenderer.new(data, options)
-      renderer.call
-      renderer.rendered_content
-    end
-
     def initialize(data, options = {})
       @data = data
       @options = options

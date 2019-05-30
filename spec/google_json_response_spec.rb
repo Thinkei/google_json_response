@@ -1,5 +1,4 @@
 require "spec_helper"
-require 'byebug'
 
 describe GoogleJsonResponse do
   describe 'Active Record rendering' do
@@ -129,7 +128,8 @@ describe GoogleJsonResponse do
 
       it 'calls ParseErrors with correct params' do
         response = GoogleJsonResponse.render_error(error)
-        expect(response).to eq({ data: 'test' })
+        expect(response)
+          .to eq({ error: { errors: [{ message: "Error 1", reason: "StandardError" }] } })
       end
     end
 
@@ -140,27 +140,46 @@ describe GoogleJsonResponse do
 
       it 'calls ParseErrors with correct params' do
         response = GoogleJsonResponse.render_error(errors)
-        expect(response).to eq({ data: 'test' })
+        expect(response)
+          .to eq({ error: { errors: [{ message: "Error 1" }, { message: "Error 2" }] } })
       end
     end
 
-    context "data is a ActiveModel::Errors" do
-      let!(:errors_1) { ActiveModel::Errors.new(test_model) }
+    context 'ActiveModel::Error' do
+      let!(:error) { ActiveModel::Errors.new(test_model) }
 
-      it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(errors_1)
-        expect(response).to eq({ data: 'test' })
+      context "Single model error" do
+        before { error.add(:email, 'error') }
+
+        it 'render correct error contents' do
+          response = GoogleJsonResponse.render_error(error)
+          expect(response)
+            .to eq({ error:
+                       { errors: [
+                         {
+                           location: :email,
+                           location_type: :field,
+                           message: "Email error",
+                           reason: "error"
+                         }
+                       ] }
+                   })
+        end
       end
-    end
 
-    context "data is an array of ActiveModel::Errors" do
-      let!(:errors_1) { ActiveModel::Errors.new(test_model) }
-      let!(:errors_2) { ActiveModel::Errors.new(test_model) }
-      let!(:errors_array) { [errors_1, errors_2] }
+      context "multiple error contexts" do
+        before do
+          error.add(:email, 'error')
+          error.add(:name, 'error')
+        end
 
-      it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(errors_array)
-        expect(response).to eq({ data: 'test' })
+        it 'calls ParseErrors with correct params' do
+          response = GoogleJsonResponse.render_error(error)
+          expect(response).to eq({ error: { errors: [
+            { location: :email, location_type: :field, message: "Email error", reason: "error" },
+            { location: :name, location_type: :field, message: "Name error", reason: "error" }
+          ] } })
+        end
       end
     end
 
@@ -168,16 +187,7 @@ describe GoogleJsonResponse do
       it 'renders a generic error' do
         response = GoogleJsonResponse.render_error("You can't access this page")
         expect(response)
-          .to eq({
-                   error: {
-                     errors: [
-                       {
-                         message: "You can't access this page",
-                         reason: 'error'
-                       }
-                     ]
-                   }
-                 })
+          .to eq({ error: { errors: [{ message: "You can't access this page" }] } })
       end
     end
   end
