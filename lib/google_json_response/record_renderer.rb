@@ -28,14 +28,14 @@ module GoogleJsonResponse
     end
 
     def active_record?
-      return data[0].is_a?(::ActiveRecord::Base) if data.is_a?(::Array)
       return false if !defined?(::ActiveRecord::Base) || !defined?(::ActiveRecord::Relation)
+      return data[0].is_a?(::ActiveRecord::Base) if data.is_a?(::Array)
       data.is_a?(::ActiveRecord::Base) || data.is_a?(::ActiveRecord::Relation)
     end
 
     def sequel_record?
-      return data[0].is_a?(::Sequel::Model) if data.is_a?(::Array)
       return false if !defined?(::Sequel::Model) || !defined?(::Sequel::Dataset)
+      return data[0].is_a?(::Sequel::Model) if data.is_a?(::Array)
       data.is_a?(::Sequel::Model) || data.is_a?(::Sequel::Dataset)
     end
 
