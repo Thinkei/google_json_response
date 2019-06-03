@@ -204,7 +204,7 @@ describe GoogleJsonResponse do
       let!(:error) { ActiveModel::Errors.new(test_model) }
 
       context "Single model error" do
-        before { require 'google_json_response/record_parsers/parse_active_records' }
+        before { require 'google_json_response/active_records' }
         before { error.add(:email, 'error') }
 
         it 'render correct error contents' do
@@ -224,7 +224,7 @@ describe GoogleJsonResponse do
       end
 
       context "multiple error contexts" do
-      before { require 'google_json_response/record_parsers/parse_active_records' }
+        before { require 'google_json_response/active_records' }
         before do
           error.add(:email, 'error')
           error.add(:name, 'error')
