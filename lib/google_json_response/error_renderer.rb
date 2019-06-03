@@ -1,5 +1,4 @@
 require "google_json_response/error_parsers/parse_generic_error"
-require "google_json_response/error_parsers/parse_active_record_error"
 require "google_json_response/error_parsers/parse_standard_error"
 
 module GoogleJsonResponse
