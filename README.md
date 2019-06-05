@@ -14,6 +14,7 @@ Please note that the term "code" in this gem is not HTTP code (obviously you can
     - [Scenario 4: Render a generic error message](#scenario-4-render-a-generic-error-message)
     - [Scenario 5: Render a generic message](#scenario-5-render-a-generic-message)
     - [Scenario 6: Render sequel records with active model serializers](#scenario-6-render-sequel-records-with-active-model-serializers)
+    - [Scenario 7: Render error messages for grape api](#scenario-7-render-error-messages-for-grape-api)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -295,6 +296,23 @@ The result will be like this
 
 ```
 
+#### Scenario 7: Render error messages for grape api
+If you are using grape api, you can use the following code snippet for rendering errors  
+```ruby
+  error!(GoogleJsonResponse.render_error(['You can't access this page']), 400)
+```
+The result will be like this  
+```json
+{
+  "error": {
+    "errors": [
+      {
+        "message": "You can't access this page"
+      }
+    ]
+  }
+}
+```
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
