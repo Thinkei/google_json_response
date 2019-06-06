@@ -10,8 +10,8 @@ module GoogleJsonResponse
       renderer.rendered_content
     end
 
-    def render_error(errors)
-      renderer = GoogleJsonResponse::ErrorRenderer.new(errors)
+    def render_error(errors, options = {})
+      renderer = GoogleJsonResponse::ErrorRenderer.new(errors, options)
       renderer.call
       renderer.rendered_content
     end
