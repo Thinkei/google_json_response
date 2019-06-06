@@ -8,10 +8,11 @@ end
 module GoogleJsonResponse
   module ErrorParsers
     class ParseActiveRecordError
-      attr_reader :parsed_data, :errors
+      attr_reader :parsed_data, :options, :errors
 
-      def initialize(errors)
+      def initialize(errors, options = {})
         @errors = errors
+        @options = options
       end
 
       def call
@@ -19,6 +20,10 @@ module GoogleJsonResponse
       end
 
       private
+
+      def show_active_record_full_message?
+        @options[:active_record_full_message] == true
+      end
 
       def render_validation_error
         error_objects = []
@@ -39,10 +44,14 @@ module GoogleJsonResponse
       end
 
       def validation_message(errors, field, index)
-        if errors.messages[field][index].try(:chr) == '^'
-          return errors.full_messages_for(field)[index].split('^', 2).last
+        if show_active_record_full_message?
+          if errors.messages[field][index].try(:chr) == '^'
+            return errors.full_messages_for(field)[index].split('^', 2).last
+          end
+          errors.full_messages_for(field)[index]
+        else
+          errors.messages[field][index]
         end
-        errors.full_messages_for(field)[index]
       end
 
       def field_index(field)

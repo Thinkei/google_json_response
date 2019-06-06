@@ -58,14 +58,37 @@ We have model User and we have the error handling for model User in CreateUser s
 Now we want to render the error at the application layer (Rails controller for example)
 ```ruby
   if !service.success?
-    return GoogleJsonResponse.render_error(service.errors, code: 400).to_json
+    return GoogleJsonResponse.render_error(service.errors, code: 'INVALID').to_json
   end
 ```
 Here is what we will have from the above code snippet
 ```json
 {
   "error": {
-    "code": "400",
+    "code": "INVALID",
+    "errors": [
+      {
+        "reason": "invalid",
+        "message": "is invalid",
+        "location": "email",
+        "location_type": "field"
+      }
+    ]
+  }
+}
+```
+
+If we want active record to actomatically add the field name to the error message, we can set active_record_full_message true  
+```ruby
+  if !service.success?
+    return GoogleJsonResponse.render_error(service.errors, active_record_full_message: true, code: 'INVALID').to_json
+  end
+```
+Here is what we will have from the above code snippet  
+```json
+{
+  "error": {
+    "code": "INVALID",
     "errors": [
       {
         "reason": "invalid",

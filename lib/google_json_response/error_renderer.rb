@@ -3,10 +3,12 @@ require "google_json_response/error_parsers/parse_standard_error"
 
 module GoogleJsonResponse
   class ErrorRenderer
-    attr_reader :errors, :rendered_content
+    attr_reader :errors, :options, :rendered_content
 
-    def initialize(errors)
+
+    def initialize(errors, options = {})
       @errors = errors
+      @options = options
     end
 
     def call
@@ -23,7 +25,7 @@ module GoogleJsonResponse
         if standard_error?
           GoogleJsonResponse::ErrorParsers::ParseStandardError.new(errors)
         elsif active_model_error?
-          GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors)
+          GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(errors, options)
         else
           GoogleJsonResponse::ErrorParsers::ParseGenericError.new(errors)
         end

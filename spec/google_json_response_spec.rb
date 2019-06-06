@@ -215,11 +215,50 @@ describe GoogleJsonResponse do
                          {
                            location: :email,
                            location_type: :field,
-                           message: "Email error",
+                           message: "error",
                            reason: "error"
                          }
                        ] }
                    })
+        end
+        context "Render with real model" do
+          let!(:record) { User.new(key: nil, name: "test") }
+                   
+          context "Include field name" do
+            it 'render correct error contents' do
+              record.save
+              response = GoogleJsonResponse.render_error(record.errors, active_record_full_message: true)
+              expect(response)
+                .to eq({ error:
+                           { errors: [
+                               {
+                                 location: :key,
+                                 location_type: :field,
+                                 message: "Key Please select an key before you submit",
+                                 reason: :blank
+                               }
+                             ] }
+                       })
+            end
+          end
+
+          context "Not include field name" do
+            it 'render correct error contents' do
+              record.save
+              response = GoogleJsonResponse.render_error(record.errors)
+              expect(response)
+                .to eq({ error:
+                           { errors: [
+                               {
+                                 location: :key,
+                                 location_type: :field,
+                                 message: "Please select an key before you submit",
+                                 reason: :blank
+                               }
+                             ] }
+                       })
+            end
+          end
         end
       end
 
@@ -233,8 +272,8 @@ describe GoogleJsonResponse do
         it 'calls ParseErrors with correct params' do
           response = GoogleJsonResponse.render_error(error)
           expect(response).to eq({ error: { errors: [
-            { location: :email, location_type: :field, message: "Email error", reason: "error" },
-            { location: :name, location_type: :field, message: "Name error", reason: "error" }
+            { location: :email, location_type: :field, message: "error", reason: "error" },
+            { location: :name, location_type: :field, message: "error", reason: "error" }
           ] } })
         end
       end
