@@ -32,8 +32,13 @@ module GoogleJsonResponse
       end
 
       def serializer_option
-        return { each_serializer: serializer_klass } if record.is_a?(Sequel::Dataset)
-        super
+        if record.is_a?(Sequel::Dataset)
+          return { each_serializer: serializer_klass, root: '' }
+        elsif record.is_a?(Sequel::Model)
+          return { serializer: serializer_klass, root: '' }
+        elsif record.is_a?(::Array) && record&.first&.is_a?(Sequel::Model)
+          { each_serializer: serializer_klass, root: '' }
+        end
       end
     end
   end
