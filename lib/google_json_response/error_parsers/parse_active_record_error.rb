@@ -55,8 +55,8 @@ module GoogleJsonResponse
       end
 
       def field_index(field)
-        if errors.messages[field].size > 1
-          field_messages = errors.messages[field]
+        if errors.messages.with_indifferent_access[field].size > 1
+          field_messages = errors.messages.with_indifferent_access[field]
           field_index = field_messages.index { |message| message == "is invalid" }
           return field_index
         end

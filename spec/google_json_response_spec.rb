@@ -260,6 +260,26 @@ describe GoogleJsonResponse do
             end
           end
         end
+
+        context "Render with errors of the association" do
+          let!(:record) { Man.new(name: 'Dang Nguyen', wives_attributes: [{ age: 18}]) }
+
+          it 'render correct error contents' do
+            record.save
+            response = GoogleJsonResponse.render_error(record.errors)
+            expect(response)
+              .to eq({ error:
+                         { errors: [
+                             {
+                               location: :"wives.name",
+                               location_type: :field,
+                               message: "can't be blank",
+                               reason: :blank
+                             }
+                           ] }
+                     })
+          end
+        end
       end
 
       context "multiple error contexts" do
