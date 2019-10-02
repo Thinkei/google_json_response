@@ -178,7 +178,7 @@ describe GoogleJsonResponse do
       it 'calls ParseErrors with correct params' do
         response = GoogleJsonResponse.render_error(errors)
         expect(response)
-          .to eq({ error: { errors: [{ message: "Error 1" }, { message: "Error 2" }] } })
+          .to eq({ error: { errors: [{ message: "Error 1", :reason=>"StandardError" }, { message: "Error 2", :reason=>"StandardError" }] } })
       end
     end
   end
@@ -358,6 +358,43 @@ describe GoogleJsonResponse do
             .to eq({ error: { errors: [{ message: 'Error'}, { message: 'Unknown Error!' }] } })
         end
       end
+    end
+  end
+
+  describe "Render Errors with mixed types" do
+    before { require 'google_json_response/active_records' }
+    let!(:record) { User.new(key: nil, name: "test") }
+
+    before do
+      record.save
+    end
+
+    let!(:error_1) { StandardError.new("Error") }
+    let!(:error_2) { record.errors }
+    let!(:error_3) { "Hello world" }
+
+
+    it 'renders correctly' do
+      response = GoogleJsonResponse.render_error([error_1, error_2, error_3])
+      expect(response)
+        .to eq({ error:
+                   { errors: [
+                       {
+                         message: "Error",
+                         reason: "StandardError"
+                       },
+                       {
+                         location: :key,
+                         location_type: :field,
+                         message: "Please select an key before you submit",
+                         reason: :blank
+                       },
+                       {
+                         message: "Hello world",
+                       }
+                     ]
+                   }
+               })
     end
   end
 
