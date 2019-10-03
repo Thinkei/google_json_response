@@ -5,6 +5,7 @@ require 'active_record'
 require 'active_model_serializers'
 require 'sequel'
 require 'database_cleaner'
+require 'byebug'
 
 #Active record test data
 ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
