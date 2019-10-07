@@ -50,7 +50,7 @@ module GoogleJsonResponse
           end
           errors.full_messages_for(field)[index]
         else
-          errors.messages[field][index]
+          errors[field][index]
         end
       end
 
