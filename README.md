@@ -25,7 +25,9 @@ Please note that the term "code" in this gem is not HTTP code (obviously you can
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'google_json_response'
+source 'https://gem.fury.io/eh-devops/' do
+  gem 'google_json_response'
+end
 ```
 
 And then execute:
