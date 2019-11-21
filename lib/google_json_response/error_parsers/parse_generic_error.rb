@@ -5,7 +5,7 @@ module GoogleJsonResponse
     class ParseGenericError
       attr_reader :errors, :parsed_data
 
-      GENERIC_ERROR_MESSAGE = 'Unknown Error!'
+      GENERIC_ERROR_MESSAGE = 'Unknown Error!'.freeze
 
       def initialize(errors, options = {})
         @errors = errors
