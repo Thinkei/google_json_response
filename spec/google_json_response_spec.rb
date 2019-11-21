@@ -163,10 +163,20 @@ describe GoogleJsonResponse do
     context "data is a StandardError" do
       let!(:error) { StandardError.new("Error") }
 
-      it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(error)
-        expect(response)
-          .to eq({ error: { errors: [{ message: "Error", reason: "StandardError" }] } })
+      context 'render without code' do
+        it 'calls ParseErrors with correct params' do
+          response = GoogleJsonResponse.render_error(error)
+          expect(response)
+            .to eq({ error: { errors: [{ message: "Error", reason: "StandardError" }] } })
+        end
+      end
+
+      context 'render with code' do
+        it 'calls ParseErrors with correct params' do
+          response = GoogleJsonResponse.render_error(error, code: 'CustomCode')
+          expect(response)
+            .to eq({ error: { code: 'CustomCode', errors: [{ message: "Error", reason: "StandardError" }] } })
+        end
       end
     end
 
@@ -221,6 +231,25 @@ describe GoogleJsonResponse do
                        ] }
                    })
         end
+
+        context "Render with code" do
+          it 'render correct error contents' do
+            response = GoogleJsonResponse.render_error(error, code: "CustomCode")
+            expect(response)
+              .to eq({ error:
+                         {
+                           code: "CustomCode",
+                           errors: [{
+                                      location: :email,
+                                      location_type: :field,
+                                      message: "error",
+                                      reason: "error"
+                                    }]
+                         }
+                     })
+          end
+        end
+
         context "Render with real model" do
           let!(:record) { User.new(key: nil, name: "test") }
                    
@@ -303,9 +332,9 @@ describe GoogleJsonResponse do
   describe "Render Generic Errors" do
     context "String Type Errors" do
       it 'renders a single string error correctly' do
-        response = GoogleJsonResponse.render_error("You can't access this page")
+        response = GoogleJsonResponse.render_error("You can't access this page", code: 'CustomCode')
         expect(response)
-          .to eq({ error: { errors: [{ message: "You can't access this page" }] } })
+          .to eq({ error: { code: 'CustomCode', errors: [{ message: "You can't access this page" }] } })
       end
 
       context 'data is an array of Strings' do

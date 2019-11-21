@@ -21,6 +21,10 @@ module GoogleJsonResponse
 
       private
 
+      def code
+        @options[:code]
+      end
+
       def show_active_record_full_message?
         @options[:active_record_full_message] == true
       end
@@ -40,7 +44,10 @@ module GoogleJsonResponse
             end
           end
         end
-        { error: { errors: error_objects } }
+
+        errors_data = { errors: error_objects }
+        errors_data[:code] = code if code
+        { error: errors_data }
       end
 
       def validation_message(errors, field, index)

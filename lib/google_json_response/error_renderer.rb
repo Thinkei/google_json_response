@@ -42,11 +42,11 @@ module GoogleJsonResponse
 
     def create_parser(input_errors)
       if standard_error?(input_errors)
-        GoogleJsonResponse::ErrorParsers::ParseStandardError.new(input_errors)
+        GoogleJsonResponse::ErrorParsers::ParseStandardError.new(input_errors, options)
       elsif active_model_error?(input_errors)
         GoogleJsonResponse::ErrorParsers::ParseActiveRecordError.new(input_errors, options)
       else
-        GoogleJsonResponse::ErrorParsers::ParseGenericError.new(input_errors)
+        GoogleJsonResponse::ErrorParsers::ParseGenericError.new(input_errors, options)
       end
     end
 
