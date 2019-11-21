@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GoogleJsonResponse
   module ErrorParsers
     class ParseGenericError
@@ -5,8 +7,9 @@ module GoogleJsonResponse
 
       GENERIC_ERROR_MESSAGE = 'Unknown Error!'.freeze
 
-      def initialize(errors)
+      def initialize(errors, options = {})
         @errors = errors
+        @options = options
       end
 
       def call
@@ -19,10 +22,16 @@ module GoogleJsonResponse
             generic_object
           end
 
-        @parsed_data = { error: { errors: error_objects } }
+        errors_data = { errors: error_objects }
+        errors_data[:code] = code if code
+        @parsed_data = { error: errors_data }
       end
 
       private
+
+      def code
+        @options[:code]
+      end
 
       def exception_object
         [{ message: errors.message, reason: errors.class.name }]
@@ -48,4 +57,3 @@ module GoogleJsonResponse
     end
   end
 end
-
