@@ -186,9 +186,9 @@ describe GoogleJsonResponse do
       let!(:errors) { [error_1, error_2] }
 
       it 'calls ParseErrors with correct params' do
-        response = GoogleJsonResponse.render_error(errors)
+        response = GoogleJsonResponse.render_error(errors, code: 69)
         expect(response)
-          .to eq({ error: { errors: [{ message: "Error 1", :reason=>"StandardError" }, { message: "Error 2", :reason=>"StandardError" }] } })
+          .to eq({ error: { code: 69, errors: [{ message: "Error 1", :reason=>"StandardError" }, { message: "Error 2", :reason=>"StandardError" }] } })
       end
     end
   end
@@ -252,14 +252,15 @@ describe GoogleJsonResponse do
 
         context "Render with real model" do
           let!(:record) { User.new(key: nil, name: "test") }
-                   
+
           context "Include field name" do
             it 'render correct error contents' do
               record.save
-              response = GoogleJsonResponse.render_error(record.errors, active_record_full_message: true)
+              response = GoogleJsonResponse.render_error(record.errors, active_record_full_message: true, code: 69)
               expect(response)
                 .to eq({ error:
-                           { errors: [
+                           { code: 69,
+                             errors: [
                                {
                                  location: :key,
                                  location_type: :field,
@@ -295,10 +296,11 @@ describe GoogleJsonResponse do
 
           it 'render correct error contents' do
             record.save
-            response = GoogleJsonResponse.render_error(record.errors)
+            response = GoogleJsonResponse.render_error(record.errors, code: 96)
             expect(response)
               .to eq({ error:
-                         { errors: [
+                         { code: 96,
+                           errors: [
                              {
                                location: :"wives.name",
                                location_type: :field,
@@ -341,8 +343,8 @@ describe GoogleJsonResponse do
         let(:string_array) { ['Error 1', 'Error 2'] }
 
         it 'renders correctly' do
-          expect(GoogleJsonResponse.render_error(string_array))
-            .to eq({ error: { errors: [{ message: 'Error 1'}, { message: 'Error 2' }] } })
+          expect(GoogleJsonResponse.render_error(string_array, code: 69))
+            .to eq({ error: { code: 69, errors: [{ message: 'Error 1'}, { message: 'Error 2' }] } })
         end
       end
     end
@@ -404,10 +406,11 @@ describe GoogleJsonResponse do
 
 
     it 'renders correctly' do
-      response = GoogleJsonResponse.render_error([error_1, error_2, error_3])
+      response = GoogleJsonResponse.render_error([error_1, error_2, error_3], code: 66)
       expect(response)
         .to eq({ error:
-                   { errors: [
+                   { code: 66,
+                     errors: [
                        {
                          message: "Error",
                          reason: "StandardError"
