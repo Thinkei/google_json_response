@@ -31,12 +31,13 @@ module GoogleJsonResponse
           errors: []
         }
       }
-      errors.each do |e| 
+      errors.each do |e|
         parser = create_parser(e)
         parser.call
         next if parser.parsed_data.blank?
         temp_parsed_data[:error][:errors].push(*parser.parsed_data[:error][:errors])
       end
+      temp_parsed_data[:error][:code] = options[:code] if options[:code]
       temp_parsed_data
     end
 
