@@ -24,10 +24,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 12.3.3"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "activerecord"
-  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "sqlite3", '~> 1.3.13'
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "kaminari"
   spec.add_development_dependency "sequel"
+  spec.add_development_dependency 'active_model-errors_details', '~> 1.3.1'
   spec.add_development_dependency 'active_model_serializers', '>= 0.10.0'
   spec.add_development_dependency 'database_cleaner'
 end

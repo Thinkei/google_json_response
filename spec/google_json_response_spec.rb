@@ -194,28 +194,22 @@ describe GoogleJsonResponse do
   end
 
   describe "Active Model Errors Rendering" do
-    let!(:test_model) {
-      stub_const 'TestModel', Class.new
-      TestModel.class_eval do
-        include ActiveModel::Validations
-
-        def initialize(attributes = {})
-          @attributes = attributes
-        end
-
-        def read_attribute_for_validation(key)
-          @attributes[key]
-        end
-      end
-      TestModel.new(id: 1, email: "test@test.com", first_name: "a")
-    }
-
     context 'ActiveModel::Error' do
-      let!(:error) { ActiveModel::Errors.new(test_model) }
+      before do
+        require 'active_model'
+        require 'google_json_response/active_records'
+        require 'active_model/errors_details'
+      end
+
+      let!(:record) { User.new(key: nil, name: "test") }
+
+      before do
+        record.save
+      end
+
+      let!(:error) { record.errors }
 
       context "Single model error" do
-        before { require 'google_json_response/active_records' }
-        before { error.add(:email, 'error') }
 
         it 'render correct error contents' do
           response = GoogleJsonResponse.render_error(error)
@@ -223,10 +217,10 @@ describe GoogleJsonResponse do
             .to eq({ error:
                        { errors: [
                          {
-                           location: :email,
+                           location: :key,
                            location_type: :field,
-                           message: "error",
-                           reason: "error"
+                           message: 'Please select an key before you submit',
+                           reason: :blank
                          }
                        ] }
                    })
@@ -240,10 +234,10 @@ describe GoogleJsonResponse do
                          {
                            code: "CustomCode",
                            errors: [{
-                                      location: :email,
+                                      location: :key,
                                       location_type: :field,
-                                      message: "error",
-                                      reason: "error"
+                                      message: 'Please select an key before you submit',
+                                      reason: :blank
                                     }]
                          }
                      })
@@ -302,7 +296,7 @@ describe GoogleJsonResponse do
                          { code: 96,
                            errors: [
                              {
-                               location: :"wives.name",
+                               location: "wives.name",
                                location_type: :field,
                                message: "can't be blank",
                                reason: :blank
@@ -323,6 +317,7 @@ describe GoogleJsonResponse do
         it 'calls ParseErrors with correct params' do
           response = GoogleJsonResponse.render_error(error)
           expect(response).to eq({ error: { errors: [
+            { location: :key, location_type: :field, message: "Please select an key before you submit", reason: :blank },
             { location: :email, location_type: :field, message: "error", reason: "error" },
             { location: :name, location_type: :field, message: "error", reason: "error" }
           ] } })
@@ -332,6 +327,22 @@ describe GoogleJsonResponse do
   end
 
   describe "Render Generic Errors" do
+    context "Render errors with array of hash" do
+      it 'renders error correctly' do
+        response = GoogleJsonResponse.render_error([{code: 'key', message: 'message'}])
+        expect(response)
+          .to eq({ error: { errors: [{ reason: 'key', message: "message" }] } })
+      end
+    end
+
+    context "Render errors with a hash" do
+      it 'renders error correctly' do
+        response = GoogleJsonResponse.render_error({code: 'key', message: 'message'})
+        expect(response)
+          .to eq({ error: { errors: [{ reason: 'key', message: "message" }] } })
+      end
+    end
+
     context "String Type Errors" do
       it 'renders a single string error correctly' do
         response = GoogleJsonResponse.render_error("You can't access this page", code: 'CustomCode')
