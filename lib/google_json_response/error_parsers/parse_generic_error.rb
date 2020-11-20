@@ -38,7 +38,13 @@ module GoogleJsonResponse
       end
 
       def generic_object
-        [{ message: generic_message_content_for(errors) }]
+        error_object = { message: generic_message_content_for(errors) }
+        error_object[:reason] = generic_object_error_reason if generic_object_error_reason
+        [error_object]
+      end
+
+      def generic_object_error_reason
+        @errors[:code] || @errors[:reason] || @errors[:key] if @errors.is_a?(Hash)
       end
 
       def generic_message_content_for(error)

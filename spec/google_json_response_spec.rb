@@ -332,6 +332,22 @@ describe GoogleJsonResponse do
   end
 
   describe "Render Generic Errors" do
+    context "Render errors with array of hash" do
+      it 'renders error correctly' do
+        response = GoogleJsonResponse.render_error([{code: 'key', message: 'message'}])
+        expect(response)
+          .to eq({ error: { errors: [{ reason: 'key', message: "message" }] } })
+      end
+    end
+
+    context "Render errors with a hash" do
+      it 'renders error correctly' do
+        response = GoogleJsonResponse.render_error({code: 'key', message: 'message'})
+        expect(response)
+          .to eq({ error: { errors: [{ reason: 'key', message: "message" }] } })
+      end
+    end
+
     context "String Type Errors" do
       it 'renders a single string error correctly' do
         response = GoogleJsonResponse.render_error("You can't access this page", code: 'CustomCode')
